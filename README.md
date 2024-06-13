@@ -1,6 +1,9 @@
+
+![SCR-20240613-u2](https://github.com/blockimperiumdao/godotblockchain/assets/94347075/c9a7724f-b7fa-446f-9b3b-2f08b64c865e)
+
 ## Overview
 
-The BlockImperiumGames (BIG) Godot Blockchain plugin is a game specific optimization of the Thirdweb .NET SDK speifically tailored for games build with the opensource Godot 
+The BlockImperiumGames (BIG) Godot Blockchain plugin is a game specific optimization of the Thirdweb .NET SDK speifically tailored for games built with the opensource Godot 
 gaming engine. It simplifies the integration of Web3 functionality into a game with a specific focus on the behaviors typically need for game developers (query token, 
 purchase/load NFTs, etc) all while operating in the traditional Godot Node/Composition architecture to make this compatible with existing tools and Visual Programming solutions.
 
