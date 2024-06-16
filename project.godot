@@ -11,8 +11,14 @@ config_version=5
 [application]
 
 config/name="GodotBlockchain"
+run/main_scene="res://ui/connect/connect.tscn"
 config/features=PackedStringArray("4.3", "C#", "Forward Plus")
 config/icon="res://icon.svg"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
 
 [dotnet]
 
@@ -21,3 +27,8 @@ project/assembly_name="GodotBlockchain"
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/godotblockchain/plugin.cfg")
+
+[gui]
+
+theme/custom="res://ui/ui_theme.tres"
+theme/custom_font="res://ui/fonts/Satoshi_Complete/Fonts/OTF/Satoshi-Bold.otf"

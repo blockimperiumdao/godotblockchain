@@ -11,8 +11,20 @@ public partial class BlockchainManager : Node
 {
 	[Signal]
 	public delegate void LogMessageEventHandler( string logMessage );
+	private static BlockchainManager instance = null;
+	public static BlockchainManager Instance { 
+		get 
+		{
+			if (instance == null )
+			{
+				instance = new BlockchainManager();
+			}
 
-	public static BlockchainManager Instance { get; private set; }
+			return instance;
+
+		}
+	
+	}
 
 	public ThirdwebClient internalClient { get; internal set; }
 
@@ -30,6 +42,7 @@ public partial class BlockchainManager : Node
 
 	public override void _Ready()
 	{
+		
 		// listen for the intialization of the ThirdwebClient
 		BlockchainClientNode.Instance.BlockchainClientInitiatized += () =>
 		{

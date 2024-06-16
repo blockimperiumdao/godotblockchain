@@ -53,13 +53,19 @@ public partial class BlockchainClientNode : Node
 			BlockchainManager.Instance.EmitLog("BlockchainManager initialized");
 		}
 
+		if (clientConfiguration == null )
+		{
+			BlockchainManager.Instance.EmitLog("Create a ClientConfiguration resource and assign it to the BlockchainClient");
+		}
+
+
+		BlockchainManager.Instance.EmitLog("Starting client with " + clientConfiguration.clientId + " and bundleId " + clientConfiguration.bundleId );
+		
 		// create a ThirdwebClient based on the exported chainID and bundleId
 		internalClient = ThirdwebClient.Create(
 			clientId: clientConfiguration.clientId,
 			bundleId: clientConfiguration.bundleId
 		);
-
-		//BlockchainManager.Instance.internalClient = internalClient;
 
 		// emit a signal so systems will know that we are ready
 		//
@@ -70,9 +76,38 @@ public partial class BlockchainClientNode : Node
 			OS.RequestPermissions();
 		}
 		
+		BlockchainClientNode.Instance.AwaitingOTP += SetStateAwaitingOTP;
+		BlockchainClientNode.Instance.InAppWalletCreated += SetStateInAppWalletCreated;
+		BlockchainClientNode.Instance.SmartWalletCreated += SetStateSmartWalletCreated;
+
+		
+	}
+	
+	private void SetStateAwaitingOTP()
+	{
+		BlockchainManager.Instance.EmitLog("Awaiting OTP");
+		
+		otpEntry.Visible = true;
+		emailEntry.Visible = false;
 	}
 
-	public async void OnEmailSubmit()
+	private void SetStateInAppWalletCreated( string address )
+	{
+		BlockchainManager.Instance.EmitLog("InAppWalletAddress " + address);
+		
+		otpEntry.Visible = false;
+		emailEntry.Visible = false;
+	}
+
+	private void SetStateSmartWalletCreated( string address )
+	{
+		BlockchainManager.Instance.EmitLog("SmartWalletAddress " + address);
+		
+		otpEntry.Visible = false;
+		emailEntry.Visible = false;
+	}
+
+	public async void OnStartLogin()
 	{
 		BlockchainManager.Instance.EmitLog("Submitting Email address");
 	
@@ -131,7 +166,7 @@ public partial class BlockchainClientNode : Node
 		}
 	}
 
-	public async void CreateSmartWallet()
+	private async void CreateSmartWallet()
 	{
 		smartWallet	= await SmartWallet.Create(
 				client: internalClient,
@@ -143,7 +178,7 @@ public partial class BlockchainClientNode : Node
 
 		if (smartWallet != null)
 		{
-			BlockchainManager.Instance.EmitLog($"SmartWallet created: {await smartWallet.GetAddress()}");		
+			BlockchainManager.Instance.EmitLog($"SmartWallet address: {await smartWallet.GetAddress()}");		
 			EmitSignal(SignalName.SmartWalletCreated, await smartWallet.GetAddress());
 		}
 		else
@@ -151,8 +186,6 @@ public partial class BlockchainClientNode : Node
 			BlockchainManager.Instance.EmitLog("SmartWallet creation failed");
 		}
 	}
-
-
 
 }
 

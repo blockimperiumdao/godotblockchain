@@ -10,12 +10,12 @@ public partial class godotblockchain : EditorPlugin
 		// Initialization of the Contract plugin goes here.
 		var managerScript = GD.Load<Script>("res://addons/godotblockchain/BlockchainContractNode.cs");
 		var managerTexture = GD.Load<Texture2D>("res://addons/godotblockchain/svg/block-filled-svgrepo-com.svg");
-		AddCustomType("BlockchainManager", "BlockchainNode", managerScript, managerTexture);
+		AddCustomType("BlockchainManager", "Node", managerScript, managerTexture);
 		
 		// Initialization of the client plugin goes here.
 		var clientScript = GD.Load<Script>("res://addons/godotblockchain/BlockchainClientNode.cs");
 		var clientTexture = GD.Load<Texture2D>("res://addons/godotblockchain/svg/user-id-svgrepo-com.svg");
-		AddCustomType("BlockchainClient", "BlockchainNode", clientScript, clientTexture);		
+		AddCustomType("BlockchainClient", "Node", clientScript, clientTexture);		
 		
 		// Initialization of the Contract plugin goes here.
 		var contractScript = GD.Load<Script>("res://addons/godotblockchain/BlockchainContractNode.cs");
