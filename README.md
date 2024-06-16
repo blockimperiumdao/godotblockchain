@@ -76,14 +76,3 @@ for calling contracts, it is intended as an integrated solution.
 You are now ready for connections to your Thirdweb AccountFactory and other Blockchain functionality in your game. 
 
 NOTE: If you are using version control, ensure that the configuration is NOT committed to your version control repository by adding the file to your .gitignore
-
-
-## Usage
-
-There are a series of Blockchain nodes attached to the project which have reasonably clear purposes. The two that must be present are the BlockchainManager, which keeps track of the 
-various contracts, and the BlockchainClient which is what will perform the actual connection to the blockchain using Thirdweb. This library does not provide simply functionality
-for calling contracts, it is intended as an integrated solution.
-
-## Getting Started
-
-In version 0.3, the best way to get started is to read the Unit Tests. Sorry, need some time to build out better documentation and some videos - which should be coming in a later version.
