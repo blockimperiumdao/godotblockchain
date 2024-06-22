@@ -7,6 +7,8 @@ The BlockImperiumGames (BIG) Godot Blockchain plugin is a game specific optimiza
 gaming engine. It simplifies the integration of Web3 functionality into a game with a specific focus on the behaviors typically need for game developers (query token, 
 purchase/load NFTs, etc) all while operating in the traditional Godot Node/Composition architecture to make this compatible with existing tools and Visual Programming solutions.
 
+This project is offered under the LGPL Version 3 (https://www.gnu.org/licenses/lgpl-3.0.txt). A copy of the license for this project is in the license file atached to this project.
+
 ## Features
 
 
