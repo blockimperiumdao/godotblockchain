@@ -40,7 +40,7 @@ An complete csproj file might look like
 
   <ItemGroup>
 	<!-- Other NuGet package references -->
-	<PackageReference Include="Thirdweb" Version="0.4.0" />
+	<PackageReference Include="Thirdweb" Version="1.0.0" />
 	<!-- Update with the latest version when necessary -->
   </ItemGroup>
 </Project>
