@@ -169,10 +169,10 @@ public partial class BlockchainClientNode : Node
 	private async void CreateSmartWallet()
 	{
 		smartWallet	= await SmartWallet.Create(
-				personalWallet: inAppWallet,
-				factoryAddress: clientConfiguration.walletFactoryAddress,
-				gasless: clientConfiguration.isGasless,
-				chainId: clientConfiguration.chainId
+			personalWallet: inAppWallet,
+			factoryAddress: clientConfiguration.walletFactoryAddress,
+			gasless: clientConfiguration.isGasless,
+			chainId: clientConfiguration.chainId
 		);
 
 		if (smartWallet != null)
