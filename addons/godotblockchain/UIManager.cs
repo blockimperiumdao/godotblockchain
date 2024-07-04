@@ -68,7 +68,7 @@ public partial class UIManager : Node
 		EmailInput.Visible = true;		
 		
 		EmailSubmit = GetNode<Button>( emailSubmitButtonPath );
-		EmailSubmit.Pressed += BlockchainClientNode.Instance.OnEmailSubmit;
+		EmailSubmit.Pressed += BlockchainClientNode.Instance.OnStartLogin;
 
 
 		BlockchainClientNode.Instance.LogMessage += ProcessLogMessage;

@@ -169,7 +169,6 @@ public partial class BlockchainClientNode : Node
 	private async void CreateSmartWallet()
 	{
 		smartWallet	= await SmartWallet.Create(
-				client: internalClient,
 				personalWallet: inAppWallet,
 				factoryAddress: clientConfiguration.walletFactoryAddress,
 				gasless: clientConfiguration.isGasless,
