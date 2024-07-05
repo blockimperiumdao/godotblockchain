@@ -32,6 +32,9 @@ public partial class BlockchainClientNode : Node
 	public delegate void SmartWalletCreatedEventHandler( string smartWalletAddress );
 
 	[Signal]
+	public delegate void SmartWalletCreationFailedEventHandler();	
+
+	[Signal]
 	public delegate void LogMessageEventHandler( string logMessage );
 
 	public ThirdwebClient internalClient { get; internal set; }
@@ -78,9 +81,7 @@ public partial class BlockchainClientNode : Node
 		
 		BlockchainClientNode.Instance.AwaitingOTP += SetStateAwaitingOTP;
 		BlockchainClientNode.Instance.InAppWalletCreated += SetStateInAppWalletCreated;
-		BlockchainClientNode.Instance.SmartWalletCreated += SetStateSmartWalletCreated;
-
-		
+		BlockchainClientNode.Instance.SmartWalletCreated += SetStateSmartWalletCreated;		
 	}
 	
 	private void SetStateAwaitingOTP()
@@ -114,6 +115,7 @@ public partial class BlockchainClientNode : Node
 		if (emailEntry == null)
 		{
 			BlockchainManager.Instance.EmitLog("You need to set the emailEntry field");
+			return;
 		}
 		string emailAddress = emailEntry.Text;
 		
@@ -183,6 +185,7 @@ public partial class BlockchainClientNode : Node
 		else
 		{
 			BlockchainManager.Instance.EmitLog("SmartWallet creation failed");
+			EmitSignal(SignalName.SmartWalletCreationFailed);
 		}
 	}
 
