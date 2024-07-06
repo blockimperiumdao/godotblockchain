@@ -2,3 +2,4 @@
 .godot/
 android/
 big_client_configuration.tres
+.DS_Store
