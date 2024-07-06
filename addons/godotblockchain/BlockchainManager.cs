@@ -42,6 +42,12 @@ public partial class BlockchainManager : Node
 
 	public override void _Ready()
 	{
+		// as soon as the client node is ready, start listening
+		// for log messages
+		BlockchainClientNode.Instance.Ready += () =>
+		{
+			BlockchainClientNode.Instance.LogMessage += EmitLog;
+		};
 		
 		// listen for the intialization of the ThirdwebClient
 		BlockchainClientNode.Instance.BlockchainClientInitiatized += () =>

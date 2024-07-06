@@ -12,12 +12,9 @@ public partial class BlockchainClientNode : Node
 	[Export]
 	public BlockchainClientConfigurationResource clientConfiguration { get; internal set; }
 	
-	[Export]
-	private LineEdit emailEntry;
 	
-	[Export]
-	private LineEdit otpEntry;
-	
+	[Signal]
+	public delegate void BlockchainClientReadyEventHandler();
 	
 	[Signal]
 	public delegate void BlockchainClientInitiatizedEventHandler();
@@ -43,26 +40,35 @@ public partial class BlockchainClientNode : Node
 
 	public static BlockchainClientNode Instance { get; private set; }
 
+	public void Log( string message )
+	{
+		EmitSignal(SignalName.LogMessage, message );
+	}
+
 	public override void _Ready()
 	{
+		// emit a signal so systems will know that we are ready
+		//
+		EmitSignal(SignalName.BlockchainClientReady);		
+		
 		if (Instance != null)
 		{
-			BlockchainManager.Instance.EmitLog("Multiple instances of BlockchainManager are not allowed");
+			Log("Multiple instances of BlockchainManager are not allowed");
 			return;
 		}
 		else
 		{
 			Instance = this;
-			BlockchainManager.Instance.EmitLog("BlockchainManager initialized");
+			Log("BlockchainManager initialized");
 		}
 
 		if (clientConfiguration == null )
 		{
-			BlockchainManager.Instance.EmitLog("Create a ClientConfiguration resource and assign it to the BlockchainClient");
+			Log("Create a ClientConfiguration resource and assign it to the BlockchainClient");
 		}
 
 
-		BlockchainManager.Instance.EmitLog("Starting client with " + clientConfiguration.clientId + " and bundleId " + clientConfiguration.bundleId );
+		Log("Starting client with " + clientConfiguration.clientId + " and bundleId " + clientConfiguration.bundleId );
 		
 		// create a ThirdwebClient based on the exported chainID and bundleId
 		internalClient = ThirdwebClient.Create(
@@ -78,93 +84,56 @@ public partial class BlockchainClientNode : Node
 		{
 			OS.RequestPermissions();
 		}
-		
-		BlockchainClientNode.Instance.AwaitingOTP += SetStateAwaitingOTP;
-		BlockchainClientNode.Instance.InAppWalletCreated += SetStateInAppWalletCreated;
-		BlockchainClientNode.Instance.SmartWalletCreated += SetStateSmartWalletCreated;		
+			
 	}
 	
-	private void SetStateAwaitingOTP()
-	{
-		BlockchainManager.Instance.EmitLog("Awaiting OTP");
-		
-		otpEntry.Visible = true;
-		emailEntry.Visible = false;
-	}
 
-	private void SetStateInAppWalletCreated( string address )
+	public async void OnStartLogin( string emailAddress )
 	{
-		BlockchainManager.Instance.EmitLog("InAppWalletAddress " + address);
-		
-		otpEntry.Visible = false;
-		emailEntry.Visible = false;
-	}
-
-	private void SetStateSmartWalletCreated( string address )
-	{
-		BlockchainManager.Instance.EmitLog("SmartWalletAddress " + address);
-		
-		otpEntry.Visible = false;
-		emailEntry.Visible = false;
-	}
-
-	public async void OnStartLogin()
-	{
-		BlockchainManager.Instance.EmitLog("Submitting Email address");
-	
-		if (emailEntry == null)
-		{
-			BlockchainManager.Instance.EmitLog("You need to set the emailEntry field");
-			return;
-		}
-		string emailAddress = emailEntry.Text;
-		
+		Log("Starting login for " + emailAddress);
+			
+		Log("Creating InAppWallet for " + emailAddress);
 		inAppWallet = await InAppWallet.Create(client: internalClient, email: emailAddress , authprovider: AuthProvider.Google);
 
 		if (!await inAppWallet.IsConnected())
 		{
+			Log("Sending OTP");
 			await inAppWallet.SendOTP();
-			BlockchainManager.Instance.EmitLog( emailAddress + " submitted for wallet access" );
+			Log( emailAddress + " submitted for wallet access" );
 			EmitSignal(SignalName.AwaitingOTP);
 		}		
 		else
 		{
-			BlockchainManager.Instance.EmitLog("InAppWallet already connected");
+			Log("InAppWallet already connected logging in...");
 			EmitSignal(SignalName.InAppWalletCreated, await inAppWallet.GetAddress() );
-			BlockchainManager.Instance.EmitLog(await inAppWallet.GetAddress());
+			Log(await inAppWallet.GetAddress());
 
 			if (smartWallet == null)
 			{
-				BlockchainManager.Instance.EmitLog("Creating SmartWallet");
+				Log("Creating SmartWallet for account");
 				CreateSmartWallet();
 			}	
 			else
 			{
-				BlockchainManager.Instance.EmitLog("SmartWallet already created");
+				Log("SmartWallet already created for account");
 			}
 		}	
 	}
 
-	public async void OnOTPSubmit()
+	public async void OnOTPSubmit( string otp )
 	{
-		BlockchainManager.Instance.EmitLog("Submitting OTP");
-		
-		if (otpEntry == null)
-		{
-			BlockchainManager.Instance.EmitLog("You must set the OTP entry field");
-		}
+		Log("Submitting OTP " + otp);
 
-		string otpInput = otpEntry.Text;
-		var (address, canRetry) = await inAppWallet.SubmitOTP(otpInput);
+		var (address, canRetry) = await inAppWallet.SubmitOTP(otp);
 
 		if (address != null)
 		{
-			BlockchainManager.Instance.EmitLog($"Address: {address}");
+			Log($"Address: {address}");
 			CreateSmartWallet();
 		}
 		else
 		{
-			BlockchainManager.Instance.EmitLog("Invalid OTP");
+			Log("Invalid OTP");
 		}
 	}
 
@@ -179,12 +148,12 @@ public partial class BlockchainClientNode : Node
 
 		if (smartWallet != null)
 		{
-			BlockchainManager.Instance.EmitLog($"SmartWallet address: {await smartWallet.GetAddress()}");		
+			Log($"SmartWallet address: {await smartWallet.GetAddress()}");		
 			EmitSignal(SignalName.SmartWalletCreated, await smartWallet.GetAddress());
 		}
 		else
 		{
-			BlockchainManager.Instance.EmitLog("SmartWallet creation failed");
+			Log("SmartWallet creation failed");
 			EmitSignal(SignalName.SmartWalletCreationFailed);
 		}
 	}

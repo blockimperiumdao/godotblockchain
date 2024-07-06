@@ -11,6 +11,12 @@ This project is offered under the LGPL Version 3 (https://www.gnu.org/licenses/l
 
 ## Features
 
+Version 0.5.0 Removes entirely, the UI components which are now all in the BIGConnect project. This was
+done to make the system more modular and enable users to bring their own UX.
+
+Version 0.6.0 Optimizations and decoupling of the log management for the client from the BlockchainManagerNode
+so that other components can listen to this via signals as opposed to it going direct
+to a particular node.
 
 ## Installation
 
