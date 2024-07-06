@@ -32,7 +32,7 @@ public partial class BlockchainClientNode : Node
 	public delegate void SmartWalletCreationFailedEventHandler();	
 
 	[Signal]
-	public delegate void LogMessageEventHandler( string logMessage );
+	public delegate void ClientLogMessageEventHandler( string logMessage );
 
 	public ThirdwebClient internalClient { get; internal set; }
 	public InAppWallet inAppWallet { get; internal set; }
@@ -42,7 +42,8 @@ public partial class BlockchainClientNode : Node
 
 	public void Log( string message )
 	{
-		EmitSignal(SignalName.LogMessage, message );
+		EmitSignal(SignalName.ClientLogMessage, "BlockchainClientNode: " + message );
+		BlockchainManager.Instance.EmitLog("BlockchainClientNode: " + message);
 	}
 
 	public override void _Ready()
@@ -53,13 +54,13 @@ public partial class BlockchainClientNode : Node
 		
 		if (Instance != null)
 		{
-			Log("Multiple instances of BlockchainManager are not allowed");
+			Log("Multiple instances of BlockchainClientNode are not allowed");
 			return;
 		}
 		else
 		{
 			Instance = this;
-			Log("BlockchainManager initialized");
+			Log("BlockchainClientNode initialized");
 		}
 
 		if (clientConfiguration == null )
@@ -87,19 +88,17 @@ public partial class BlockchainClientNode : Node
 			
 	}
 	
-
 	public async void OnStartLogin( string emailAddress )
 	{
 		Log("Starting login for " + emailAddress);
 			
-		Log("Creating InAppWallet for " + emailAddress);
-		inAppWallet = await InAppWallet.Create(client: internalClient, email: emailAddress , authprovider: AuthProvider.Google);
+		inAppWallet = await InAppWallet.Create(client: internalClient, email: emailAddress);
 
 		if (!await inAppWallet.IsConnected())
 		{
-			Log("Sending OTP");
+			Log("Sending OTP Challenge");
 			await inAppWallet.SendOTP();
-			Log( emailAddress + " submitted for wallet access" );
+			Log( emailAddress + " sent OTP challenge for wallet access" );
 			EmitSignal(SignalName.AwaitingOTP);
 		}		
 		else
@@ -133,7 +132,7 @@ public partial class BlockchainClientNode : Node
 		}
 		else
 		{
-			Log("Invalid OTP");
+			Log("Invalid OTP. Try again.");
 		}
 	}
 
