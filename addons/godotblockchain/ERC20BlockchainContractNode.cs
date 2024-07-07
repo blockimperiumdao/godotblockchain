@@ -7,7 +7,7 @@ using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Signer;
 
 
-public partial class BlockchainContractNode : Node
+public partial class ERC20BlockchainContractNode : Node
 {
 	[Signal]
 	public delegate void BlockchainContractInitializedEventHandler();
