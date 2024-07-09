@@ -30,13 +30,13 @@ public partial class BlockchainManager : Node
 
 	public void EmitLog( string message )
 	{
-		GD.Print("BlockchainManager: " +  message );
+		GD.Print( message );
 		EmitSignal(SignalName.LogMessage, message);
 	}
 
 	public void EmitError( string message )
 	{
-		GD.PushError("BlockchainManager: " +  message );
+		GD.PushError( message );
 		EmitSignal(SignalName.LogMessage, message);
 	}
 
@@ -46,7 +46,7 @@ public partial class BlockchainManager : Node
 		// for log messages
 		BlockchainClientNode.Instance.Ready += () =>
 		{
-			BlockchainClientNode.Instance.LogMessage += EmitLog;
+			BlockchainClientNode.Instance.ClientLogMessage += EmitLog;
 		};
 		
 		// listen for the intialization of the ThirdwebClient
