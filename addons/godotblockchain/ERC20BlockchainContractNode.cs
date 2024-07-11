@@ -3,24 +3,18 @@ using System.Threading.Tasks;
 using Godot;
 using Thirdweb;
 using System.Numerics;
-using Nethereum.RPC.Eth.DTOs;
-using Nethereum.Signer;
 
 
-public partial class ERC20BlockchainContractNode : Node
+public partial class ERC20BlockchainContractNode : BlockchainContractNode
 {
 	[Signal]
-	public delegate void BlockchainContractInitializedEventHandler();
-
-    [Export]
-    public BlockchainContractResource contractResource { get; internal set; }
+	public delegate void ERC20BlockchainContractInitializedEventHandler();
 
 	public string tokenName;
 	public string symbol;
 	public BigInteger totalSupply;
 	public BigInteger balanceOf;
 
-    protected ThirdwebContract contract { get; private set; }
     public string currencyAddress { get; private set; }
     public BigInteger maxClaimable { get; private set; }
     public byte[] merkleRoot { get; private set; }
@@ -29,7 +23,7 @@ public partial class ERC20BlockchainContractNode : Node
     public BigInteger supplyClaimed { get; private set; }
 	public int decimals { get; private set; }
 
-    public async void Initialize()
+    public new async void Initialize()
     {
 		contract = await ThirdwebContract.Create(
 			client: BlockchainManager.Instance.internalClient,
@@ -37,11 +31,11 @@ public partial class ERC20BlockchainContractNode : Node
 			chain: contractResource.chainId
 		);
 
-		Metadata();
+		FetchMetadata();
 
 		// emit a signal so systems will know that we are ready
 		//
-		EmitSignal(SignalName.BlockchainContractInitialized);
+		EmitSignal(SignalName.ERC20BlockchainContractInitialized);
     }   
 
 	public void Log( string message )
@@ -51,7 +45,7 @@ public partial class ERC20BlockchainContractNode : Node
 	} 
 
 	// fills the node with the metadata from the Blockchain based on the active (i.e currently use) claim condition
-    public async void Metadata()
+    public async void FetchMetadata()
     {
         var claimConditions = await contract.DropERC20_GetActiveClaimCondition( );
 

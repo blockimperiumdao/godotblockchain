@@ -13,13 +13,7 @@ public partial class BlockchainContractNode : Node
     [Export]
     public BlockchainContractResource contractResource { get; internal set; }
 
-	public string tokenName;
-	public string symbol;
-	public BigInteger totalSupply;
-	public BigInteger balanceOf;
-
-
-    protected ThirdwebContract contract { get; private set; }
+    public ThirdwebContract contract { get; protected set; }
 
     public async void Initialize()
     {

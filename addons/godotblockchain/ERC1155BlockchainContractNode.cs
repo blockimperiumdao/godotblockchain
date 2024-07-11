@@ -3,25 +3,17 @@ using System.Threading.Tasks;
 using Godot;
 using Thirdweb;
 using System.Numerics;
-using Nethereum.RPC.Eth.DTOs;
-using Nethereum.Signer;
 using System.Collections.Generic;
 
 
-public partial class ERC1155BlockchainContractNode : Node
+public partial class ERC1155BlockchainContractNode : BlockchainContractNode
 {
 	[Signal]
-	public delegate void BlockchainContractInitializedEventHandler();
+	public delegate void ERC1155BlockchainContractInitializedEventHandler();
 
-    [Export]
-    public BlockchainContractResource contractResource { get; internal set; }
-
-	public string tokenName;
-	public string symbol;
 	public BigInteger totalSupply;
 	public BigInteger balanceOf;
 
-    protected ThirdwebContract contract { get; private set; }
     public string currencyAddress { get; private set; }
     public BigInteger maxClaimable { get; private set; }
     public byte[] merkleRoot { get; private set; }
@@ -29,7 +21,7 @@ public partial class ERC1155BlockchainContractNode : Node
     public BigInteger walletLimit { get; private set; }
     public BigInteger supplyClaimed { get; private set; }
 
-    public async void Initialize()
+    public new async void Initialize()
     {
 		contract = await ThirdwebContract.Create(
 			client: BlockchainManager.Instance.internalClient,
@@ -37,9 +29,12 @@ public partial class ERC1155BlockchainContractNode : Node
 			chain: contractResource.chainId
 		);
 
+		//TODO - we should pull back the metadata for all the tokens
+		FetchMetadata(0);
+
 		// emit a signal so systems will know that we are ready
 		//
-		EmitSignal(SignalName.BlockchainContractInitialized);
+		EmitSignal(SignalName.ERC1155BlockchainContractInitialized);
     }   
 
 	public void Log( string message )
@@ -90,7 +85,7 @@ public partial class ERC1155BlockchainContractNode : Node
 
 
     // get the metadata of the token based on the current claim conditions
-    public async void Metadata( BigInteger tokenId )
+    public async void FetchMetadata( BigInteger tokenId )
     {
         var claimConditions = await contract.DropERC1155_GetActiveClaimCondition( tokenId );
 

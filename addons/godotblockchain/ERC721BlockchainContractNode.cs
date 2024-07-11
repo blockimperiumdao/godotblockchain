@@ -3,26 +3,18 @@ using System.Threading.Tasks;
 using Godot;
 using Thirdweb;
 using System.Numerics;
-using Nethereum.RPC.Eth.DTOs;
-using Nethereum.Signer;
 using System.Collections.Generic;
-using NBitcoin.RPC;
 
-
-public partial class ERC721BlockchainContractNode : Node
+public partial class ERC721BlockchainContractNode : BlockchainContractNode
 {
 	[Signal]
-	public delegate void BlockchainContractInitializedEventHandler();
-
-    [Export]
-    public BlockchainContractResource contractResource { get; internal set; }
+	public delegate void ERC721BlockchainContractInitializedEventHandler();
 
 	public string tokenName;
 	public string symbol;
 	public BigInteger totalSupply;
 	public BigInteger balanceOf;
 
-    protected ThirdwebContract contract { get; private set; }
     public string currencyAddress { get; private set; }
     public BigInteger maxClaimable { get; private set; }
     public byte[] merkleRoot { get; private set; }
@@ -30,7 +22,7 @@ public partial class ERC721BlockchainContractNode : Node
     public BigInteger walletLimit { get; private set; }
     public BigInteger supplyClaimed { get; private set; }
 
-    public async void Initialize()
+    public new async void Initialize()
     {
 		contract = await ThirdwebContract.Create(
 			client: BlockchainManager.Instance.internalClient,
@@ -38,9 +30,11 @@ public partial class ERC721BlockchainContractNode : Node
 			chain: contractResource.chainId
 		);
 
+        FetchMetadata();
+
 		// emit a signal so systems will know that we are ready
 		//
-		EmitSignal(SignalName.BlockchainContractInitialized);
+		EmitSignal(SignalName.ERC721BlockchainContractInitialized);
     }   
 
 	public void Log( string message )
@@ -49,7 +43,7 @@ public partial class ERC721BlockchainContractNode : Node
 		BlockchainManager.Instance.EmitLog("ERC721BlockchainContractNode: " + message);
 	} 
     // get the metadata of the token based on the current claim conditions
-    public async void Metadata( )
+    public async void FetchMetadata( )
     {
         var claimConditions = await contract.DropERC721_GetActiveClaimCondition( );
 
