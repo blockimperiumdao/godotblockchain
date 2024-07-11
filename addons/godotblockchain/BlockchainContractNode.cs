@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 using Godot;
 using Thirdweb;
 using System.Numerics;
-using Nethereum.RPC.Eth.DTOs;
-using Nethereum.Signer;
 
 
 public partial class BlockchainContractNode : Node
@@ -36,46 +34,19 @@ public partial class BlockchainContractNode : Node
 		EmitSignal(SignalName.BlockchainContractInitialized);
     }    
 
-	public async Task<ThirdwebTransactionReceipt> ClaimERC20( string amount )
+	public async Task<string> Abi()
 	{
-		return await contract.DropERC20_Claim(  BlockchainClientNode.Instance.smartWallet, await BlockchainClientNode.Instance.smartWallet.GetAddress(), amount );
-	}	
-	
-	public async Task<BigInteger> BalanceOf(  )
-	{
-		balanceOf = await contract.ERC20_BalanceOf( await BlockchainClientNode.Instance.smartWallet.GetAddress() );
-		return balanceOf;
+		return await ThirdwebContract.FetchAbi(BlockchainManager.Instance.internalClient, contractResource.contractAddress, contractResource.chainId);	
 	}
 
-	public async Task<BigInteger> TotalSupply(  )
+	public async Task<T> Read<T>(string methodName, params object[] args)
 	{
-		totalSupply = await contract.ERC20_TotalSupply();
-
-		return totalSupply;
+		return await ThirdwebContract.Read<T>(contract, methodName, args);
 	}
 
-	public async Task<string> TokenName(  )
+	public async Task<ThirdwebTransactionReceipt> Write(string methodName, BigInteger weiValue, params object[] args)
 	{
-		tokenName = await contract.ERC20_Name();
-
-		return tokenName;
-	}
-
-	public async Task<string> Symbol(  )
-	{
-		symbol = await contract.ERC20_Symbol();
-
-		return symbol;
-	}
-
-	public async Task<BigInteger> Allowance( string owner, string spender )
-	{
-		return await contract.ERC20_Allowance( owner, spender );
-	}
-
-	public async Task<ThirdwebTransactionReceipt> Transfer( string toAddress, BigInteger amount )
-	{
-		return await contract.ERC20_Transfer( BlockchainClientNode.Instance.smartWallet, toAddress, amount );
+		return await ThirdwebContract.Write(BlockchainClientNode.Instance.smartWallet, contract, methodName, weiValue, args);
 	}
 
 }
