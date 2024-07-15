@@ -1,4 +1,3 @@
-#if TOOLS
 using System.Threading.Tasks;
 using Godot;
 using Thirdweb;
@@ -31,5 +30,3 @@ public partial class BlockchainNFTResource : Resource
 
     
 }
-
-#endif

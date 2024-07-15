@@ -1,10 +1,9 @@
-#if TOOLS
 using System.Threading.Tasks;
 using Godot;
 using Thirdweb;
 using System.Numerics;
 
-
+[GlobalClass,Tool]
 public partial class BlockchainContractNode : Node
 {
 	[Signal]
@@ -44,5 +43,3 @@ public partial class BlockchainContractNode : Node
 	}
 
 }
-
-#endif

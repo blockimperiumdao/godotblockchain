@@ -1,4 +1,3 @@
-#if TOOLS
 using System.Threading.Tasks;
 using Godot;
 using Thirdweb;
@@ -6,7 +5,7 @@ using System.Numerics;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Signer;
 
-
+[GlobalClass,Tool]
 public partial class BlockchainClientNode : Node
 {
 	[Export]
@@ -106,20 +105,10 @@ public partial class BlockchainClientNode : Node
 			Log("InAppWallet already connected logging in...");
 			EmitSignal(SignalName.InAppWalletCreated, await inAppWallet.GetAddress() );
 			Log(await inAppWallet.GetAddress());
-
-			if (smartWallet == null)
-			{
-				Log("Creating SmartWallet for account");
-				CreateSmartWallet();
-			}	
-			else
-			{
-				Log("SmartWallet already created for account");
-			}
 		}	
 	}
 
-	public async void OnOTPSubmit( string otp )
+	public async Task<bool> OnOTPSubmit( string otp )
 	{
 		Log("Submitting OTP " + otp);
 
@@ -128,15 +117,16 @@ public partial class BlockchainClientNode : Node
 		if (address != null)
 		{
 			Log($"Address: {address}");
-			CreateSmartWallet();
+			return true;
 		}
 		else
 		{
 			Log("Invalid OTP. Try again.");
+			return false;
 		}
 	}
 
-	private async void CreateSmartWallet()
+	public async void CreateSmartWallet()
 	{
 		smartWallet	= await SmartWallet.Create(
 			personalWallet: inAppWallet,
@@ -158,5 +148,3 @@ public partial class BlockchainClientNode : Node
 	}
 
 }
-
-#endif

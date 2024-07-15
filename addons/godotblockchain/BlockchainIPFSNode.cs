@@ -1,4 +1,3 @@
-#if TOOLS
 using System.Threading.Tasks;
 using Godot;
 using Thirdweb;
@@ -6,6 +5,7 @@ using System.Numerics;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Signer;
 
+[GlobalClass,Tool]
 
 public partial class BlockchainIPFSNode : Node
 {
@@ -102,5 +102,3 @@ public partial class BlockchainIPFSNode : Node
 	}     
 
 }
-
-#endif

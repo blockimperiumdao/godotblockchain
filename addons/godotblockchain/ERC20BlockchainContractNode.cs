@@ -1,10 +1,9 @@
-#if TOOLS
 using System.Threading.Tasks;
 using Godot;
 using Thirdweb;
 using System.Numerics;
 
-
+[GlobalClass,Tool]
 public partial class ERC20BlockchainContractNode : BlockchainContractNode
 {
 	[Signal]
@@ -111,5 +110,3 @@ public partial class ERC20BlockchainContractNode : BlockchainContractNode
 	}
 
 }
-
-#endif

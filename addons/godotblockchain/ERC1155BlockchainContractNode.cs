@@ -1,4 +1,3 @@
-#if TOOLS
 using System.Threading.Tasks;
 using Godot;
 using Thirdweb;
@@ -6,6 +5,7 @@ using System.Numerics;
 using System.Collections.Generic;
 
 
+[GlobalClass,Tool]
 public partial class ERC1155BlockchainContractNode : BlockchainContractNode
 {
 	[Signal]
@@ -118,5 +118,3 @@ public partial class ERC1155BlockchainContractNode : BlockchainContractNode
     }
 
 }
-
-#endif
