@@ -19,7 +19,7 @@ public partial class BlockchainNFTNode : Node
 	public async void Initialize()
 	{
 		contract = await ThirdwebContract.Create(
-			client: BlockchainManager.Instance.internalClient,
+			client: BlockchainClientNode.Instance.internalClient,
 			address: nftContractResource.contractAddress,
 			chain: nftContractResource.chainId
 		);
@@ -34,9 +34,9 @@ public partial class BlockchainNFTNode : Node
 		var allowlistProof = new object[] { new byte[] { }, BigInteger.Zero, BigInteger.Zero, Constants.ADDRESS_ZERO };
 		var data = new byte[] { };
 		var result = await ThirdwebContract.Write(smartWallet, contract, "claim", 0, receiver, quantity, currencyAddress, tokenPrice, allowlistProof, data);
-		var receipt = await ThirdwebTransaction.WaitForTransactionReceipt(BlockchainManager.Instance.internalClient, nftContractResource.chainId, result.TransactionHash);
+		var receipt = await ThirdwebTransaction.WaitForTransactionReceipt(BlockchainClientNode.Instance.internalClient, nftContractResource.chainId, result.TransactionHash);
 
-		BlockchainManager.Instance.EmitLog(receipt.ToString());
+		BlockchainLogManager.Instance.EmitLog(receipt.ToString());
 
 		return receipt;
 	} 

@@ -17,7 +17,7 @@ public partial class BlockchainContractNode : Node
     public async void Initialize()
     {
 		contract = await ThirdwebContract.Create(
-			client: BlockchainManager.Instance.internalClient,
+			client: BlockchainClientNode.Instance.internalClient,
 			address: contractResource.contractAddress,
 			chain: contractResource.chainId
 		);
@@ -29,7 +29,7 @@ public partial class BlockchainContractNode : Node
 
 	public async Task<string> Abi()
 	{
-		return await ThirdwebContract.FetchAbi(BlockchainManager.Instance.internalClient, contractResource.contractAddress, contractResource.chainId);	
+		return await ThirdwebContract.FetchAbi(BlockchainClientNode.Instance.internalClient, contractResource.contractAddress, contractResource.chainId);	
 	}
 
 	public async Task<T> Read<T>(string methodName, params object[] args)

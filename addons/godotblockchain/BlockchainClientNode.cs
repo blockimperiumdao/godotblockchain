@@ -42,14 +42,14 @@ public partial class BlockchainClientNode : Node
 	public void Log( string message )
 	{
 		EmitSignal(SignalName.ClientLogMessage, "BlockchainClientNode: " + message );
-		BlockchainManager.Instance.EmitLog("BlockchainClientNode: " + message);
+		BlockchainLogManager.Instance.EmitLog("BlockchainClientNode: " + message);
 	}
 
 	public override void _Ready()
 	{
 		// emit a signal so systems will know that we are ready
 		//
-		EmitSignal(SignalName.BlockchainClientReady);		
+		EmitSignal(SignalName.BlockchainClientReady);				
 		
 		if (Instance != null)
 		{

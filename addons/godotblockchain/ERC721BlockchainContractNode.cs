@@ -25,7 +25,7 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
     public new async void Initialize()
     {
 		contract = await ThirdwebContract.Create(
-			client: BlockchainManager.Instance.internalClient,
+			client: BlockchainClientNode.Instance.internalClient,
 			address: contractResource.contractAddress,
 			chain: contractResource.chainId
 		);
@@ -40,7 +40,7 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 	public void Log( string message )
 	{
 		//EmitSignal(SignalName.ClientLogMessage, "ERC721BlockchainContractNode: " + message );
-		BlockchainManager.Instance.EmitLog("ERC721BlockchainContractNode: " + message);
+		BlockchainLogManager.Instance.EmitLog("ERC721BlockchainContractNode: " + message);
 	} 
     // get the metadata of the token based on the current claim conditions
     public async void FetchMetadata( )

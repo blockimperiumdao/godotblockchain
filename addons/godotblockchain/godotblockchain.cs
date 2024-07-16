@@ -7,7 +7,7 @@ public partial class godotblockchain : EditorPlugin
 	public override void _EnterTree()
 	{
 		// Initialization of the Contract plugin goes here.
-		var managerScript = GD.Load<Script>("res://addons/godotblockchain/BlockchainContractNode.cs");
+		var managerScript = GD.Load<Script>("res://addons/godotblockchain/BlockchainManager.cs");
 		var managerTexture = GD.Load<Texture2D>("res://addons/godotblockchain/svg/block-filled-svgrepo-com.svg");
 		AddCustomType("BlockchainManager", "Node", managerScript, managerTexture);
 		

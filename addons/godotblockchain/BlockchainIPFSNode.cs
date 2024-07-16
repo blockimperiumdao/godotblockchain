@@ -38,25 +38,25 @@ public partial class BlockchainIPFSNode : Node
 	{
 		if ( uploadDataBytes != null )
 		{
-			IPFSUploadResult result = await ThirdwebStorage.UploadRaw(BlockchainManager.Instance.internalClient, uploadDataBytes);
+			IPFSUploadResult result = await ThirdwebStorage.UploadRaw(BlockchainClientNode.Instance.internalClient, uploadDataBytes);
 			ipfsURI = result.IpfsHash;
 
-			BlockchainManager.Instance.EmitLog("Uploaded to IPFS: " + ipfsURI);
-			BlockchainManager.Instance.EmitLog("Preview available at" + result.PreviewUrl);
+			BlockchainLogManager.Instance.EmitLog("Uploaded to IPFS: " + ipfsURI);
+			BlockchainLogManager.Instance.EmitLog("Preview available at" + result.PreviewUrl);
 
 			EmitSignal(SignalName.BlockchainIPFSUploadCompleted);			
 		}
 		else if (localFilePath == "")
 		{
-			BlockchainManager.Instance.EmitLog("Set the localPath of this node");
+			BlockchainLogManager.Instance.EmitLog("Set the localPath of this node");
 		}
 		else
 		{
-			IPFSUploadResult result = await ThirdwebStorage.Upload(BlockchainManager.Instance.internalClient, localFilePath);
+			IPFSUploadResult result = await ThirdwebStorage.Upload(BlockchainClientNode.Instance.internalClient, localFilePath);
 			ipfsURI = result.IpfsHash;
 
-			BlockchainManager.Instance.EmitLog("Uploaded to IPFS: " + ipfsURI);
-			BlockchainManager.Instance.EmitLog("Preview available at" + result.PreviewUrl);
+			BlockchainLogManager.Instance.EmitLog("Uploaded to IPFS: " + ipfsURI);
+			BlockchainLogManager.Instance.EmitLog("Preview available at" + result.PreviewUrl);
 
 			// emit a signal so systems will know that we are done uploading
 			EmitSignal(SignalName.BlockchainIPFSUploadCompleted);			
@@ -77,23 +77,23 @@ public partial class BlockchainIPFSNode : Node
 		{
 			if ( ipfsURI == "" )
 			{
-				BlockchainManager.Instance.EmitLog("Set the ipfsURI of this node or create a BlockchainIPFSResource and assign its upfsURI property");
+				BlockchainLogManager.Instance.EmitLog("Set the ipfsURI of this node or create a BlockchainIPFSResource and assign its upfsURI property");
 			}
 			else
 			{
-				downloadedData = await ThirdwebStorage.Download<string>(BlockchainManager.Instance.internalClient, ipfsURI);		
+				downloadedData = await ThirdwebStorage.Download<string>(BlockchainClientNode.Instance.internalClient, ipfsURI);		
 			}		
 		}
 		else 
 		{
 			if ( ipfsContractResource.ipfsURI == "" )
 			{
-				BlockchainManager.Instance.EmitLog("Create a BlockchainIPFSResource and assign its upfsURI property");
+				BlockchainLogManager.Instance.EmitLog("Create a BlockchainIPFSResource and assign its upfsURI property");
 			}
 			else
 			{
 				ipfsURI = ipfsContractResource.ipfsURI;
-				downloadedData = await ThirdwebStorage.Download<string>(BlockchainManager.Instance.internalClient, ipfsURI);		
+				downloadedData = await ThirdwebStorage.Download<string>(BlockchainClientNode.Instance.internalClient, ipfsURI);		
 			}
 		}
 

@@ -20,7 +20,7 @@ public partial class BlockchainTokenNode : Node
 	public async void Initialize()
 	{
 		contract = await ThirdwebContract.Create(
-			client: BlockchainManager.Instance.internalClient,
+			client: BlockchainClientNode.Instance.internalClient,
 			address: tokenContractResource.contractAddress,
 			chain: tokenContractResource.chainId
 		);
@@ -39,13 +39,13 @@ public partial class BlockchainTokenNode : Node
 
 	public async Task<BigInteger> Balance(string contractAddress, string queryAddress, BigInteger chainId)
 	{
-		BlockchainManager.Instance.EmitLog($"Creating contract -> {chainId}:{contractAddress} - balanceOf {queryAddress} being called");
+		BlockchainLogManager.Instance.EmitLog($"Creating contract -> {chainId}:{contractAddress} - balanceOf {queryAddress} being called");
 
 		string readResult = await ThirdwebContract.Read<string>(contract, "name");
-		BlockchainManager.Instance.EmitLog($"Contract result {readResult}");
+		BlockchainLogManager.Instance.EmitLog($"Contract result {readResult}");
 		
 		var balance = await ThirdwebContract.Read<BigInteger>(contract, "balanceOf", $"{queryAddress}");
-		BlockchainManager.Instance.EmitLog($"Contract result {balance}");
+		BlockchainLogManager.Instance.EmitLog($"Contract result {balance}");
 
 		return balance;
 	}

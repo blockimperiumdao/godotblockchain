@@ -25,7 +25,7 @@ public partial class ERC20BlockchainContractNode : BlockchainContractNode
     public new async void Initialize()
     {
 		contract = await ThirdwebContract.Create(
-			client: BlockchainManager.Instance.internalClient,
+			client: BlockchainClientNode.Instance.internalClient,
 			address: contractResource.contractAddress,
 			chain: contractResource.chainId
 		);
@@ -40,7 +40,7 @@ public partial class ERC20BlockchainContractNode : BlockchainContractNode
 	public void Log( string message )
 	{
 		//EmitSignal(SignalName.ClientLogMessage, "ERC20BlockchainContractNode: " + message );
-		BlockchainManager.Instance.EmitLog("ERC20BlockchainContractNode: " + message);
+		BlockchainLogManager.Instance.EmitLog("ERC20BlockchainContractNode: " + message);
 	} 
 
 	// fills the node with the metadata from the Blockchain based on the active (i.e currently use) claim condition

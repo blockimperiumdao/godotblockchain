@@ -24,7 +24,7 @@ public partial class ERC1155BlockchainContractNode : BlockchainContractNode
     public new async void Initialize()
     {
 		contract = await ThirdwebContract.Create(
-			client: BlockchainManager.Instance.internalClient,
+			client: BlockchainClientNode.Instance.internalClient,
 			address: contractResource.contractAddress,
 			chain: contractResource.chainId
 		);
@@ -40,7 +40,7 @@ public partial class ERC1155BlockchainContractNode : BlockchainContractNode
 	public void Log( string message )
 	{
 		//EmitSignal(SignalName.ClientLogMessage, "ERC1155BlockchainContractNode: " + message );
-		BlockchainManager.Instance.EmitLog("ERC1155BlockchainContractNode: " + message);
+		BlockchainLogManager.Instance.EmitLog("ERC1155BlockchainContractNode: " + message);
 	} 
 
 	public async Task<BigInteger> BalanceOf( BigInteger tokenId  )
