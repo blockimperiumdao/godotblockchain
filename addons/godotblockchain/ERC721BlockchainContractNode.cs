@@ -80,6 +80,12 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 		return balanceOf;
 	}
 
+	public async Task<BigInteger> BalanceOf( string address )
+	{
+		balanceOf = await contract.ERC721_BalanceOf( address );
+		return balanceOf;
+	}
+
     public async Task<string> OwnerOf( BigInteger tokenId )
     {
         return await contract.ERC721_OwnerOf( tokenId );
