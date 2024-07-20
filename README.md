@@ -108,6 +108,8 @@ ERC20 represents.
 
 This will connect to the AccountFactory and create an InAppWallet for your user using their email address. They will receive an email with an OTP that must be submitted to confirm the email address.
 
+### Listening for Events
+
 Since the library is async you will listen for a signal to know when things are completed. The most common things to listen for with login are the following:
 
 `
@@ -121,6 +123,7 @@ You can confirm this with a call to
 `
 			bool success = await BlockchainClientNode.Instance.OnOTPSubmit( otpTextEntry.Text );
 `
+### Creating Smart Wallets
 
 The second let's you know that the InAppWallet for the users email address has been created. Generally you would create the user's SmartWallet at this point with a call to
 
@@ -135,4 +138,29 @@ You can get the addresses to the various blockchain addresses using
 `
 			await BlockchainClientNode.Instance.smartWallet.GetAddress();
       await BlockchainClientNode.Instance.inAppWallet.GetAddress();
+`
+### Reading ERC20 Contracts
+
+Similar to how you interact with the BlockchainClientNode to get information about the address of the account you are using to connect to the Blockchain, you can get information about your ERC20 currency contract with the following
+
+`
+		currencyContract.ERC20BlockchainContractInitialized += OnERC20BlockchainContractInitialized;
+`
+
+In this case we are listning to the ERC20BlockchainContractNode and waiting for it to be initialized so we can read information about it. We can get things like the users balance, the name of the symbol for this contract, etc.
+
+`
+	public async void OnERC20BlockchainContractInitialized()
+	{
+		GD.Print("ERC20BlockchainContractInitialized");
+
+		string symbol = await currencyContract.Symbol();
+		BigInteger balance = await currencyContract.BalanceOf();
+		BigInteger decimals = await currencyContract.Decimals();
+
+		balance = balance / BigInteger.Pow(10, (int)decimals);
+
+		tokenSymbol.Text = symbol;
+		tokenBalance.Text = balance.ToString();
+	}
 `
