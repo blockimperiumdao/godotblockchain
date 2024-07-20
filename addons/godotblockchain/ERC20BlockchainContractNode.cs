@@ -22,6 +22,20 @@ public partial class ERC20BlockchainContractNode : BlockchainContractNode
     public BigInteger supplyClaimed { get; private set; }
 	public int decimals { get; private set; }
 
+	public override void _Ready()
+	{
+		if (contractResource == null)
+		{
+			Log("contractResource is null");
+			return;
+		}
+		else
+		{
+			Log("initializing contract");
+			Initialize();
+		}
+	}
+
     public new async void Initialize()
     {
 		contract = await ThirdwebContract.Create(
@@ -30,7 +44,10 @@ public partial class ERC20BlockchainContractNode : BlockchainContractNode
 			chain: contractResource.chainId
 		);
 
-		FetchMetadata();
+		//Log("Getting contract details for " + contractResource.contractAddress + " on chain " + contractResource.chainId );
+
+		//Log("Fetching metadata " + await TokenName() + ":" + await BalanceOf());
+		//FetchMetadata();
 
 		// emit a signal so systems will know that we are ready
 		//
@@ -46,8 +63,19 @@ public partial class ERC20BlockchainContractNode : BlockchainContractNode
 	// fills the node with the metadata from the Blockchain based on the active (i.e currently use) claim condition
     public async void FetchMetadata()
     {
+		Log("Getting claim conditions");
+
+		if (contract != null)
+		{
+			Log("Contract is not null");
+		}
+		else
+		{
+			Log("Contract is null");
+		}
         var claimConditions = await contract.DropERC20_GetActiveClaimCondition( );
 
+		Log("Setting metadata");
         currencyAddress = claimConditions.Currency;
         maxClaimable = claimConditions.MaxClaimableSupply;
         merkleRoot = claimConditions.MerkleRoot;
@@ -61,6 +89,12 @@ public partial class ERC20BlockchainContractNode : BlockchainContractNode
 		balanceOf = await contract.ERC20_BalanceOf( await BlockchainClientNode.Instance.smartWallet.GetAddress() );
 		return balanceOf;
 	}
+
+	public async Task<BigInteger> BalanceOf( string address )
+	{
+		balanceOf = await contract.ERC20_BalanceOf( address );
+		return balanceOf;
+	}	
 
 	public async Task<BigInteger> TotalSupply(  )
 	{
