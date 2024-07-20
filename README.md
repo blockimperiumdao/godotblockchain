@@ -79,15 +79,15 @@ Note - this will create a complete example project. You may ignore functionality
 
 5/ Add a BlockchainClientNode to the scene. In the properties, configure the BlockchainClientConfigurationResource with the data from your Thirdweb account. With this alone, your project can now utilize Smart Wallets to onboard users with only their email address.
 
-5a/ Set the address of the WalletFactory contract 
+>a/ Set the address of the WalletFactory contract 
 
-5b/ Select the ChainID of the Blockchain that your Wallet Factor is on
+>b/ Select the ChainID of the Blockchain that your Wallet Factor is on
 
-5c/ Provide a bundle id for your project (your Thirdweb configuration should whitelist this bundleid)
+>c/ Provide a bundle id for your project (your Thirdweb configuration should whitelist this bundleid)
 
-5d/ Provide the ClientID from your Thirdweb Configuration
+>d/ Provide the ClientID from your Thirdweb Configuration
 
-5e/ Check the box if you want these transactions to be gasless (consult Thirdweb documentation for this setting)
+>e/ Check the box if you want these transactions to be gasless (consult Thirdweb documentation for this setting)
 
 6/ Create a TextEdit for the email address and the one time password (OTP) that will be sent to the email address to confirm the users email address.
 
