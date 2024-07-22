@@ -5,12 +5,7 @@ using System;
 public partial class godotblockchain : EditorPlugin
 {
 	public override void _EnterTree()
-	{
-		// Initialization of the Contract plugin goes here.
-		var managerScript = GD.Load<Script>("res://addons/godotblockchain/BlockchainManager.cs");
-		var managerTexture = GD.Load<Texture2D>("res://addons/godotblockchain/svg/block-filled-svgrepo-com.svg");
-		AddCustomType("BlockchainManager", "Node", managerScript, managerTexture);
-		
+	{		
 		// Initialization of the client plugin goes here.
 		var clientScript = GD.Load<Script>("res://addons/godotblockchain/BlockchainClientNode.cs");
 		var clientTexture = GD.Load<Texture2D>("res://addons/godotblockchain/svg/user-id-svgrepo-com.svg");
@@ -63,7 +58,6 @@ public partial class godotblockchain : EditorPlugin
 	public override void _ExitTree()
 	{
 		// Clean-up of the plugin goes here.
-		RemoveCustomType("BlockchainManager");
 		RemoveCustomType("BlockchainClient");
 		RemoveCustomType("BlockchainContract");	
 		RemoveCustomType("BlockchainNFT");
