@@ -16,11 +16,28 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 	public BigInteger balanceOf;
 
     public string currencyAddress { get; private set; }
+    public ThirdwebContract currencyContract { get; private set; }
+    public BigInteger currencyDecimals { get; private set; }
     public BigInteger maxClaimable { get; private set; }
     public byte[] merkleRoot { get; private set; }
     public BigInteger tokenPrice { get; private set; }
+    public BigInteger adjustedTokenPrice { get; private set; }
     public BigInteger walletLimit { get; private set; }
     public BigInteger supplyClaimed { get; private set; }
+
+	public override void _Ready()
+	{
+		if (contractResource == null)
+		{
+			Log("ERC721 contractResource is null");
+			return;
+		}
+		else
+		{
+			Log("ERC721 initializing contract");
+			Initialize();
+		}
+	}
 
     public new async void Initialize()
     {
@@ -53,6 +70,17 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
         tokenPrice = claimConditions.PricePerToken;
         walletLimit = claimConditions.QuantityLimitPerWallet;
         supplyClaimed = claimConditions.SupplyClaimed;
+
+        var currencyContract = await ThirdwebContract.Create(
+            client: BlockchainClientNode.Instance.internalClient,
+            address: currencyAddress,
+            chain: contractResource.chainId
+        );
+
+		currencyDecimals = await currencyContract.ERC20_Decimals();
+        adjustedTokenPrice = tokenPrice / BigInteger.Pow(10, (int)currencyDecimals);
+
+        Log("Claim conditions: " + currencyAddress + " MaxClaimable: " + maxClaimable + " TokenPrice: " + adjustedTokenPrice + " WalletLimit: " + walletLimit + " SupplyClaimed: " + supplyClaimed );
     }
 
     public async Task<string> TokenName()
@@ -127,6 +155,27 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
     public async Task<byte[]> GetNFTImage( NFT nft )
     {
         return await ThirdwebExtensions.GetNFTImageBytes( nft, BlockchainClientNode.Instance.internalClient);
+    }
+
+    public async Task<Sprite2D> GetNFTAsSprite2D( BigInteger nftId  )
+    {
+        NFT nft = await contract.ERC721_GetNFT( nftId );
+
+        byte[] nftImageBytes = await nft.GetNFTImageBytes(BlockchainClientNode.Instance.internalClient);
+
+        StreamPeerBuffer stream = new StreamPeerBuffer();
+        stream.DataArray = nftImageBytes;
+
+        Image image = new Image();
+        image.LoadPngFromBuffer(nftImageBytes);
+
+        ImageTexture texture = new ImageTexture();
+        texture.SetImage(image);
+
+        Sprite2D sprite = new Sprite2D();
+        sprite.Texture = texture;
+
+        return sprite;
     }
 
 }
