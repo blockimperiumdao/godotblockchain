@@ -1,3 +1,4 @@
+#if TOOLS
 using Godot;
 using System;
 
@@ -71,3 +72,5 @@ public partial class godotblockchain : EditorPlugin
 		RemoveCustomType("BlockchainTokenResource");
 	}
 }
+
+#endif

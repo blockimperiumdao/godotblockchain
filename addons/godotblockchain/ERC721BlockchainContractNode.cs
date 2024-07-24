@@ -4,6 +4,7 @@ using Thirdweb;
 using System.Numerics;
 using System.Collections.Generic;
 
+// Rest of the code
 [GlobalClass,Tool]
 public partial class ERC721BlockchainContractNode : BlockchainContractNode
 {
@@ -161,21 +162,72 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
     {
         NFT nft = await contract.ERC721_GetNFT( nftId );
 
+        return await GetNFTAsSprite2D( nft );
+    }
+
+    public async Task<ImageTexture> GetNFTAsTexture( BigInteger nftId )
+    {
+        NFT nft = await contract.ERC721_GetNFT( nftId );
+
+        return await GetNFTAsTexture( nft );
+    }    
+
+    public async Task<StandardMaterial3D> GetNFTAsStandardMaterial3D( BigInteger nftId )
+    {
+        NFT nft = await contract.ERC721_GetNFT( nftId );
+
+        return await GetNFTAsStandardMaterial3D( nft );
+    }
+
+    public async Task<StandardMaterial3D> GetNFTAsStandardMaterial3D( NFT nft )
+    {
+        ImageTexture texture = await GetNFTAsTexture( nft );
+
+        StandardMaterial3D material = new StandardMaterial3D();
+        material.AlbedoTexture = texture;
+
+        return material;
+    }
+
+    public async Task<Sprite2D> GetNFTAsSprite2D( NFT nft )
+    {
+        ImageTexture texture = await GetNFTAsTexture( nft );
+        
+        Sprite2D sprite = new Sprite2D();
+        sprite.Texture = texture;
+
+        return sprite;        
+    }
+
+    public async Task<ImageTexture> GetNFTAsTexture( NFT nft )
+    {
         byte[] nftImageBytes = await nft.GetNFTImageBytes(BlockchainClientNode.Instance.internalClient);
 
         StreamPeerBuffer stream = new StreamPeerBuffer();
         stream.DataArray = nftImageBytes;
 
         Image image = new Image();
-        image.LoadPngFromBuffer(nftImageBytes);
+
+        if ( TokenUtils.GetFileType(nftImageBytes) == TokenUtils.PNG )
+        {
+            image.LoadPngFromBuffer(nftImageBytes);
+        }
+        else if ( TokenUtils.GetFileType(nftImageBytes) == TokenUtils.JPEG )
+        {
+            image.LoadJpgFromBuffer(nftImageBytes);
+        }
+        else
+        {
+            Log("Unknown or unsupported media type for NFT image - returning empty sprite");
+            return new ImageTexture();
+        }
 
         ImageTexture texture = new ImageTexture();
         texture.SetImage(image);
 
-        Sprite2D sprite = new Sprite2D();
-        sprite.Texture = texture;
-
-        return sprite;
+        return texture;
     }
+
+
 
 }
