@@ -42,17 +42,26 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 
     public new async void Initialize()
     {
+	    if ( ( contractResource == null ) || ( BlockchainClientNode.Instance == null ) )
+        {
+            Log("contractResource or BlockchainClientNode is null");
+            return;
+        }
+
 		contract = await ThirdwebContract.Create(
 			client: BlockchainClientNode.Instance.internalClient,
 			address: contractResource.contractAddress,
 			chain: contractResource.chainId
 		);
 
-        FetchMetadata();
+        if ( contract != null )
+        {
+            FetchMetadata();
 
-		// emit a signal so systems will know that we are ready
-		//
-		EmitSignal(SignalName.ERC721BlockchainContractInitialized);
+            // emit a signal so systems will know that we are ready
+            //
+            EmitSignal(SignalName.ERC721BlockchainContractInitialized);
+        }
     }   
 
 	public void Log( string message )

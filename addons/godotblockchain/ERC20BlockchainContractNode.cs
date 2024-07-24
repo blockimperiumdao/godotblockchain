@@ -38,6 +38,12 @@ public partial class ERC20BlockchainContractNode : BlockchainContractNode
 
     public new async void Initialize()
     {
+	    if ( ( contractResource == null ) || ( BlockchainClientNode.Instance == null ) )
+        {
+            Log("contractResource or BlockchainClientNode is null");
+            return;
+        }
+
 		contract = await ThirdwebContract.Create(
 			client: BlockchainClientNode.Instance.internalClient,
 			address: contractResource.contractAddress,
@@ -51,7 +57,10 @@ public partial class ERC20BlockchainContractNode : BlockchainContractNode
 
 		// emit a signal so systems will know that we are ready
 		//
-		EmitSignal(SignalName.ERC20BlockchainContractInitialized);
+		if (contract != null )
+		{
+			EmitSignal(SignalName.ERC20BlockchainContractInitialized);
+		}
     }   
 
 	public void Log( string message )
