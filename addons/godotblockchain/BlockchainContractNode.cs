@@ -14,6 +14,11 @@ public partial class BlockchainContractNode : Node
 
     public ThirdwebContract contract { get; protected set; }
 
+	public override void _Ready()
+	{
+		AddToGroup("Blockchain", true);
+	}
+
     public async void Initialize()
     {
 		contract = await ThirdwebContract.Create(

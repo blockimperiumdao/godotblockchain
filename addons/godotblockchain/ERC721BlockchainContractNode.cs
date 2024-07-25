@@ -3,6 +3,9 @@ using Godot;
 using Thirdweb;
 using System.Numerics;
 using System.Collections.Generic;
+using System;
+using System.Text;
+using System.IO;
 
 // Rest of the code
 [GlobalClass,Tool]
@@ -38,6 +41,8 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 			Log("ERC721 initializing contract");
 			Initialize();
 		}
+
+		AddToGroup("Blockchain", true);
 	}
 
     public new async void Initialize()
@@ -62,6 +67,8 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
             //
             EmitSignal(SignalName.ERC721BlockchainContractInitialized);
         }
+
+        AddToGroup("Blockchain", true);
     }   
 
 	public void Log( string message )
@@ -237,6 +244,45 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
         return texture;
     }
 
+    public async Task<AudioStreamMP3> GetNFTAsAudioStreamMP3(NFT nft)
+    {
+        byte[] downloadedData = await ThirdwebStorage.Download<byte[]>(BlockchainClientNode.Instance.internalClient, 
+                                                                        nft.Metadata.AnimationUrl);		
 
+        Log("Getting NFT as audio stream: " + nft.Metadata.Name);
+        Log("Getting NFT as audio stream: " + nft.Metadata.Description);
+        Log("Getting NFT as audio stream URL: " + nft.Metadata.AnimationUrl);
+
+        Log("Received bytes for audio: " + downloadedData.Length);
+
+        var audioStream = new AudioStreamMP3();
+        audioStream.Data = downloadedData;
+
+        return audioStream;
+    }
+
+    public async Task<AudioStreamMP3> GetNFTAsAudioStreamMP3(int nftId)
+    {
+        NFT nft = await contract.ERC721_GetNFT( nftId );
+        
+        return await GetNFTAsAudioStreamMP3(nft);
+    }
+
+    public async Task<byte[]> GetNFTAsByteArray(int nftId)
+    {
+        NFT nft = await contract.ERC721_GetNFT( nftId );
+
+        return await GetNFTAsByteArray(nft);
+    }
+
+    public async Task<byte[]> GetNFTAsByteArray(NFT nft)
+    {
+        byte[] downloadedData = await ThirdwebStorage.Download<byte[]>(BlockchainClientNode.Instance.internalClient, 
+                                                                        nft.Metadata.AnimationUrl);		
+
+        Log("Received bytes for audio: " + downloadedData.Length);
+
+        return downloadedData;
+    } 
 
 }

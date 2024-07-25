@@ -28,10 +28,15 @@ public partial class BlockchainIPFSNode : Node
 
 	private string downloadedData;
 
+	public override void _Ready()
+	{
+		AddToGroup("Blockchain", true);
+	}
+
 	public void Initialize()
 	{
 		// initially try to perform a download
-		Download();
+		//Download();
 	}
 
 	public async void Upload()

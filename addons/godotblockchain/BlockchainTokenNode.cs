@@ -14,8 +14,12 @@ public partial class BlockchainTokenNode : Node
     [Export]
     public BlockchainTokenResource tokenContractResource { get; internal set; }
 
-
     protected ThirdwebContract contract { get; private set; }
+
+	public override void _Ready()
+	{
+		AddToGroup("Blockchain", true);
+	}
 
 	public async void Initialize()
 	{
@@ -26,6 +30,8 @@ public partial class BlockchainTokenNode : Node
 		);
 
         EmitSignal(SignalName.BlockchainTokenInitialized);
+
+		AddToGroup("Blockchain", true);
 	}
 
 	public async Task<BigInteger> Balance(string contractAddress, BigInteger chainId)

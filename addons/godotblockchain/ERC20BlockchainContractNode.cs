@@ -34,6 +34,9 @@ public partial class ERC20BlockchainContractNode : BlockchainContractNode
 			Log("initializing contract");
 			Initialize();
 		}
+
+		AddToGroup("Blockchain", true);
+
 	}
 
     public new async void Initialize()
@@ -50,22 +53,18 @@ public partial class ERC20BlockchainContractNode : BlockchainContractNode
 			chain: contractResource.chainId
 		);
 
-		//Log("Getting contract details for " + contractResource.contractAddress + " on chain " + contractResource.chainId );
-
-		//Log("Fetching metadata " + await TokenName() + ":" + await BalanceOf());
-		//FetchMetadata();
 
 		// emit a signal so systems will know that we are ready
 		//
 		if (contract != null )
 		{
 			EmitSignal(SignalName.ERC20BlockchainContractInitialized);
-		}
+
+		}		
     }   
 
 	public void Log( string message )
 	{
-		//EmitSignal(SignalName.ClientLogMessage, "ERC20BlockchainContractNode: " + message );
 		BlockchainLogManager.Instance.EmitLog("ERC20BlockchainContractNode: " + message);
 	} 
 

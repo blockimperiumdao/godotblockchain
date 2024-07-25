@@ -21,6 +21,12 @@ public partial class ERC1155BlockchainContractNode : BlockchainContractNode
     public BigInteger walletLimit { get; private set; }
     public BigInteger supplyClaimed { get; private set; }
 
+	public override void _Ready()
+	{
+		AddToGroup("Blockchain", true);
+
+	}
+
     public new async void Initialize()
     {
 		contract = await ThirdwebContract.Create(
@@ -35,6 +41,8 @@ public partial class ERC1155BlockchainContractNode : BlockchainContractNode
 		// emit a signal so systems will know that we are ready
 		//
 		EmitSignal(SignalName.ERC1155BlockchainContractInitialized);
+
+		AddToGroup("Blockchain", true);
     }   
 
 	public void Log( string message )

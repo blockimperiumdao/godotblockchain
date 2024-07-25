@@ -4,6 +4,7 @@ using Thirdweb;
 using System.Numerics;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Signer;
+using System.Text;
 
 [GlobalClass,Tool]
 public partial class BlockchainClientNode : Node
@@ -31,6 +32,13 @@ public partial class BlockchainClientNode : Node
 	public delegate void SmartWalletCreationFailedEventHandler();	
 
 	[Signal]
+	public delegate void BlockchainClientIPFSUploadCompletedEventHandler( string ipfsURI );
+
+	[Signal]
+	public delegate void BlockchainClientIPFSDownloadCompletedEventHandler( byte[] downloadedData );
+
+
+	[Signal]
 	public delegate void ClientLogMessageEventHandler( string logMessage );
 
 	public ThirdwebClient internalClient { get; internal set; }
@@ -51,7 +59,14 @@ public partial class BlockchainClientNode : Node
 		//
 		EmitSignal(SignalName.BlockchainClientReady);				
 		
-		if (Instance != null)
+		Initialize();
+	}
+
+	public void Initialize()
+	{
+		Log("Initializing BlockchainClientNode");
+
+		if (Instance is not null)
 		{
 			Log("Multiple instances of BlockchainClientNode are not allowed");
 			return;
@@ -62,7 +77,7 @@ public partial class BlockchainClientNode : Node
 			Log("BlockchainClientNode initialized");
 		}
 
-		if (clientConfiguration == null )
+		if (clientConfiguration is null )
 		{
 			Log("Create a ClientConfiguration resource and assign it to the BlockchainClient");
 		}
@@ -76,15 +91,16 @@ public partial class BlockchainClientNode : Node
 			bundleId: clientConfiguration.bundleId
 		);
 
-		// emit a signal so systems will know that we are ready
-		//
-		EmitSignal(SignalName.BlockchainClientInitiatized);
-
 		if (OS.GetName() == "Android")
 		{
 			OS.RequestPermissions();
 		}
-			
+
+		AddToGroup("Blockchain", true);	
+
+		// emit a signal so systems will know that we are ready
+		//
+		EmitSignal(SignalName.BlockchainClientInitiatized);
 	}
 	
 	public async void OnStartLogin( string emailAddress )
@@ -146,5 +162,28 @@ public partial class BlockchainClientNode : Node
 			EmitSignal(SignalName.SmartWalletCreationFailed);
 		}
 	}
+
+	public async void IPFSUpload( byte[] uploadData )
+	{
+		IPFSUploadResult result = await ThirdwebStorage.UploadRaw(BlockchainClientNode.Instance.internalClient, uploadData);
+		var ipfsURI = result.IpfsHash;
+
+		BlockchainLogManager.Instance.EmitLog("Uploaded to IPFS: " + ipfsURI);
+		BlockchainLogManager.Instance.EmitLog("Preview available at" + result.PreviewUrl);
+
+		// emit a signal so systems will know that we are done uploading
+		EmitSignal(SignalName.BlockchainClientIPFSUploadCompleted, ipfsURI);			
+	}
+	
+	public async Task<byte[]> IPFSDownload( string ipfsURI )
+	{
+		var downloadedContent = await ThirdwebStorage.Download<string>(BlockchainClientNode.Instance.internalClient, ipfsURI);		
+		byte[] downloadedData = Encoding.UTF8.GetBytes(downloadedContent);
+
+		// emit a signal so systems will know that we are done downloading
+		EmitSignal(SignalName.BlockchainClientIPFSDownloadCompleted, downloadedData );
+
+		return downloadedData;
+	}     	
 
 }
