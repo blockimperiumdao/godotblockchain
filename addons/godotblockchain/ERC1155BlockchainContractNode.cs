@@ -13,6 +13,7 @@ public partial class ERC1155BlockchainContractNode : BlockchainContractNode
 
 	public BigInteger totalSupply;
 	public BigInteger balanceOf;
+	public List<BigInteger> balancesOf;
 
     public string currencyAddress { get; private set; }
     public BigInteger maxClaimable { get; private set; }
@@ -69,11 +70,11 @@ public partial class ERC1155BlockchainContractNode : BlockchainContractNode
         return await contract.ERC1155_GetOwnedNFTs( walletAddress );    
     }    
 
-	// public async Task<BigInteger> BalanceOfBatch( string[] addresses, BigInteger[] tokenIds  )
-	// {
-	// 	balanceOf = await contract.ERC1155_BalanceOfBatch( addresses , tokenIds );
-	// 	return balanceOf;
-	// }
+	public async Task<List<BigInteger>> BalanceOfBatch( string[] addresses, BigInteger[] tokenIds  )
+	{
+		balancesOf = await contract.ERC1155_BalanceOfBatch( addresses , tokenIds );
+		return balancesOf;
+	}
 
 	public async Task<BigInteger> TotalSupply(  )
 	{
@@ -81,8 +82,6 @@ public partial class ERC1155BlockchainContractNode : BlockchainContractNode
 
 		return totalSupply;
 	}
-
-
 
 	public async Task<BigInteger> TotalSupply( BigInteger tokenId  )
 	{
@@ -109,20 +108,126 @@ public partial class ERC1155BlockchainContractNode : BlockchainContractNode
 	{
 		return await contract.DropERC1155_Claim( BlockchainClientNode.Instance.smartWallet, await BlockchainClientNode.Instance.smartWallet.GetAddress(), tokenId, quantity );
 	}	
-	
-	public async Task<BigInteger> Allowance( string owner, string spender )
-	{
-		return await contract.ERC20_Allowance( owner, spender );
-	}
 
-	public async Task<ThirdwebTransactionReceipt> Transfer( string toAddress, BigInteger amount )
+	public async Task<ThirdwebTransactionReceipt> Transfer( string fromAddress, string toAddress, BigInteger tokenId, BigInteger amount )
 	{
-		return await contract.ERC20_Transfer( BlockchainClientNode.Instance.smartWallet, toAddress, amount );
+		return await contract.ERC1155_SafeTransferFrom( BlockchainClientNode.Instance.smartWallet, fromAddress, toAddress, tokenId, amount, new byte[] {} );
 	}
 
     public async Task<byte[]> GetNFTImage( NFT nft )
     {
         return await ThirdwebExtensions.GetNFTImageBytes( nft, BlockchainClientNode.Instance.internalClient);
     }
+
+  public async Task<Sprite2D> GetNFTAsSprite2D( BigInteger nftId  )
+    {
+        NFT nft = await contract.ERC1155_GetNFT( nftId );
+
+        return await GetNFTAsSprite2D( nft );
+    }
+
+    public async Task<ImageTexture> GetNFTAsTexture( BigInteger nftId )
+    {
+        NFT nft = await contract.ERC1155_GetNFT( nftId );
+
+        return await GetNFTAsTexture( nft );
+    }    
+
+    public async Task<StandardMaterial3D> GetNFTAsStandardMaterial3D( BigInteger nftId )
+    {
+        NFT nft = await contract.ERC1155_GetNFT( nftId );
+
+        return await GetNFTAsStandardMaterial3D( nft );
+    }
+
+    public async Task<StandardMaterial3D> GetNFTAsStandardMaterial3D( NFT nft )
+    {
+        ImageTexture texture = await GetNFTAsTexture( nft );
+
+        StandardMaterial3D material = new StandardMaterial3D();
+        material.AlbedoTexture = texture;
+
+        return material;
+    }
+
+    public async Task<Sprite2D> GetNFTAsSprite2D( NFT nft )
+    {
+        ImageTexture texture = await GetNFTAsTexture( nft );
+        
+        Sprite2D sprite = new Sprite2D();
+        sprite.Texture = texture;
+
+        return sprite;        
+    }
+
+    public async Task<ImageTexture> GetNFTAsTexture( NFT nft )
+    {
+        byte[] nftImageBytes = await nft.GetNFTImageBytes(BlockchainClientNode.Instance.internalClient);
+
+        StreamPeerBuffer stream = new StreamPeerBuffer();
+        stream.DataArray = nftImageBytes;
+
+        Image image = new Image();
+
+        if ( TokenUtils.GetFileType(nftImageBytes) == TokenUtils.PNG )
+        {
+            image.LoadPngFromBuffer(nftImageBytes);
+        }
+        else if ( TokenUtils.GetFileType(nftImageBytes) == TokenUtils.JPEG )
+        {
+            image.LoadJpgFromBuffer(nftImageBytes);
+        }
+        else
+        {
+            Log("Unknown or unsupported media type for NFT image - returning empty sprite");
+            return new ImageTexture();
+        }
+
+        ImageTexture texture = new ImageTexture();
+        texture.SetImage(image);
+
+        return texture;
+    }
+
+    public async Task<AudioStreamMP3> GetNFTAsAudioStreamMP3(NFT nft)
+    {
+        byte[] downloadedData = await ThirdwebStorage.Download<byte[]>(BlockchainClientNode.Instance.internalClient, 
+                                                                        nft.Metadata.AnimationUrl);		
+
+        Log("Getting NFT as audio stream: " + nft.Metadata.Name);
+        Log("Getting NFT as audio stream: " + nft.Metadata.Description);
+        Log("Getting NFT as audio stream URL: " + nft.Metadata.AnimationUrl);
+
+        Log("Received bytes for audio: " + downloadedData.Length);
+
+        var audioStream = new AudioStreamMP3();
+        audioStream.Data = downloadedData;
+
+        return audioStream;
+    }
+
+    public async Task<AudioStreamMP3> GetNFTAsAudioStreamMP3(int nftId)
+    {
+        NFT nft = await contract.ERC1155_GetNFT( nftId );
+        
+        return await GetNFTAsAudioStreamMP3(nft);
+    }
+
+    public async Task<byte[]> GetNFTAsByteArray(int nftId)
+    {
+        NFT nft = await contract.ERC1155_GetNFT( nftId );
+
+        return await GetNFTAsByteArray(nft);
+    }
+
+    public async Task<byte[]> GetNFTAsByteArray(NFT nft)
+    {
+        byte[] downloadedData = await ThirdwebStorage.Download<byte[]>(BlockchainClientNode.Instance.internalClient, 
+                                                                        nft.Metadata.AnimationUrl);		
+
+        Log("Received bytes for audio: " + downloadedData.Length);
+
+        return downloadedData;
+    } 
 
 }
