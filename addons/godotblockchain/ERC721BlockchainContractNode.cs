@@ -19,6 +19,7 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 	public BigInteger totalSupply;
 	public BigInteger balanceOf;
 
+    public string contractAddress { get; private set; }
     public string currencyAddress { get; private set; }
     public ThirdwebContract currencyContract { get; private set; }
     public BigInteger currencyDecimals { get; private set; }
@@ -59,16 +60,16 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 			chain: contractResource.chainId
 		);
 
+        contractAddress = contractResource.contractAddress;
+
         if ( contract != null )
         {
-            FetchMetadata();
+            await FetchMetadata();
 
             // emit a signal so systems will know that we are ready
             //
             EmitSignal(SignalName.ERC721BlockchainContractInitialized);
         }
-
-        AddToGroup("Blockchain", true);
     }   
 
 	public void Log( string message )
@@ -77,7 +78,7 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 		BlockchainLogManager.Instance.EmitLog("ERC721BlockchainContractNode: " + message);
 	} 
     // get the metadata of the token based on the current claim conditions
-    public async void FetchMetadata( )
+    public async Task<Drop_ClaimCondition> FetchMetadata( )
     {
         var claimConditions = await contract.DropERC721_GetActiveClaimCondition( );
 
@@ -88,7 +89,7 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
         walletLimit = claimConditions.QuantityLimitPerWallet;
         supplyClaimed = claimConditions.SupplyClaimed;
 
-        var currencyContract = await ThirdwebContract.Create(
+        currencyContract = await ThirdwebContract.Create(
             client: BlockchainClientNode.Instance.internalClient,
             address: currencyAddress,
             chain: contractResource.chainId
@@ -98,6 +99,8 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
         adjustedTokenPrice = tokenPrice / BigInteger.Pow(10, (int)currencyDecimals);
 
         Log("Claim conditions: " + currencyAddress + " MaxClaimable: " + maxClaimable + " TokenPrice: " + adjustedTokenPrice + " WalletLimit: " + walletLimit + " SupplyClaimed: " + supplyClaimed );
+    
+        return claimConditions;
     }
 
     public async Task<string> TokenName()
@@ -155,7 +158,9 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 
 	public async Task<ThirdwebTransactionReceipt> Claim( BigInteger quantity )
 	{
-		return await contract.DropERC721_Claim( BlockchainClientNode.Instance.smartWallet, await BlockchainClientNode.Instance.smartWallet.GetAddress(), quantity );
+		return await contract.DropERC721_Claim( BlockchainClientNode.Instance.smartWallet, 
+                                                await BlockchainClientNode.Instance.smartWallet.GetAddress(), 
+                                                quantity );
 	}	
 
     public async Task<ThirdwebTransactionReceipt> Transfer( string fromAddress, string toAddress, BigInteger tokenId )
