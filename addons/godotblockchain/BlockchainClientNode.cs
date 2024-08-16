@@ -1,10 +1,9 @@
 using System.Threading.Tasks;
 using Godot;
 using Thirdweb;
-using System.Numerics;
-using Nethereum.RPC.Eth.DTOs;
-using Nethereum.Signer;
 using System.Text;
+
+namespace BIGConnect.addons.godotblockchain;
 
 [GlobalClass,Tool]
 public partial class BlockchainClientNode : Node

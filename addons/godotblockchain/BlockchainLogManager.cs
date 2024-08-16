@@ -1,9 +1,6 @@
-using System.Threading.Tasks;
 using Godot;
-using Thirdweb;
-using System.Numerics;
-using Nethereum.RPC.Eth.DTOs;
-using Nethereum.Signer;
+
+namespace BIGConnect.addons.godotblockchain;
 
 [GlobalClass,Tool]
 

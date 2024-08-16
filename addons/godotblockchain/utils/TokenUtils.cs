@@ -1,3 +1,5 @@
+namespace BIGConnect.addons.godotblockchain.utils;
+
 static class TokenUtils {
 	public const string BASE_USDC_TOKEN = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 	public const string BASE_DEGEN_TOKEN = "0x4ed4e862860bed51a9570b96d89af5e1b0efefed";

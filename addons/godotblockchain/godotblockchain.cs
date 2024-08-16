@@ -1,6 +1,7 @@
 #if TOOLS
 using Godot;
-using System;
+
+namespace BIGConnect.addons.godotblockchain;
 
 [Tool]
 public partial class godotblockchain : EditorPlugin
