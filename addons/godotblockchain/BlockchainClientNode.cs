@@ -11,7 +11,6 @@ public partial class BlockchainClientNode : Node
 	[Export]
 	public BlockchainClientConfigurationResource clientConfiguration { get; internal set; }
 	
-	
 	[Signal]
 	public delegate void BlockchainClientReadyEventHandler();
 	
@@ -35,8 +34,7 @@ public partial class BlockchainClientNode : Node
 
 	[Signal]
 	public delegate void BlockchainClientIPFSDownloadCompletedEventHandler( byte[] downloadedData );
-
-
+	
 	[Signal]
 	public delegate void ClientLogMessageEventHandler( string logMessage );
 
@@ -127,7 +125,7 @@ public partial class BlockchainClientNode : Node
 	{
 		Log("Submitting OTP " + otp);
 
-		var (address, canRetry) = await inAppWallet.SubmitOTP(otp);
+		var (address, canRetry) = await inAppWallet.LoginWithOtp(otp);
 
 		if (address != null)
 		{

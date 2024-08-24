@@ -16,21 +16,28 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 	[Signal]
 	public delegate void ERC721BlockchainContractInitializedEventHandler();
 
-	private string _tokenName;
-	private string _currencySymbol;
-	private BigInteger _totalSupply;
-	private BigInteger _balanceOf;
+	public class ERC721TokenMetadata
+	{
+		public BigInteger TotalSupply { get; internal set; }
+		public BigInteger BalanceOf { get; internal set; }
 
-    public string ContractAddress { get; private set; }
-    public string CurrencyAddress { get; private set; }
-    private string CurrencyIcon { get; set; }
-    public ThirdwebContract ThirdwebCurrencyContract { get; private set; }
-    public BigInteger CurrencyDecimals { get; private set; }
-    public BigInteger MaxClaimable { get; private set; }
-    public byte[] MerkleRoot { get; private set; }
-    public BigInteger TokenPrice { get; private set; }
-    public BigInteger WalletLimit { get; private set; }
-    public BigInteger SupplyClaimed { get; private set; }
+		public string CurrencySymbol { get; internal set; }
+		public string TokenSymbol { get; internal set; }
+		public string TokenName { get; internal set; }
+		
+		public string ContractAddress { get; internal set; }
+		public string CurrencyAddress { get; internal set; }
+		public string CurrencyIcon { get; internal set; }
+		public ThirdwebContract ThirdwebCurrencyContract { get; internal set; }
+		public BigInteger CurrencyDecimals { get; internal set; }
+		public BigInteger MaxClaimable { get; internal set; }
+		public byte[] MerkleRoot { get; internal set; }
+		public BigInteger TokenPrice { get; internal set; }
+		public BigInteger WalletLimit { get; internal set; }
+		public BigInteger SupplyClaimed { get; internal set; }
+		public Drop_ClaimCondition ClaimConditions { get; internal set; }
+		public ThirdwebContract CurrencyContract { get; internal set; }
+	}
 
 	public override void _Ready()
 	{
@@ -41,7 +48,7 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 		}
 		else
 		{
-			Log("ERC721 initializing contract");
+			Log("ERC721 initializing contract " + ContractResource.contractAddress);
 			Initialize();
 		}
 
@@ -61,17 +68,12 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 			address: ContractResource.contractAddress,
 			chain: ContractResource.chainId
 		);
+		
+        if (InternalThirdwebContract == null) return;
 
-        ContractAddress = ContractResource.contractAddress;
-
-        if ( InternalThirdwebContract != null )
-        {
-            await FetchMetadata();
-
-            // emit a signal so systems will know that we are ready
-            //
-            EmitSignal(SignalName.ERC721BlockchainContractInitialized);
-        }
+        // emit a signal so systems will know that we are ready
+        //
+        EmitSignal(SignalName.ERC721BlockchainContractInitialized);
     }   
 
 	public void Log( string message )
@@ -81,7 +83,7 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 	} 
 	
 	// fills the node with the metadata from the Blockchain based on the active (i.e. currently use) claim condition
-	public async Task<Drop_ClaimCondition> FetchMetadata()
+	public async Task<ERC721TokenMetadata> FetchMetadata()
 	{
 		Log("Getting claim conditions");
 
@@ -95,90 +97,90 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 		}
 		var claimConditions = await InternalThirdwebContract.DropERC721_GetActiveClaimCondition( );
 
+		ERC721TokenMetadata metadata = new ERC721TokenMetadata()
+		{
+			CurrencyAddress = claimConditions.Currency,
+			MaxClaimable = claimConditions.MaxClaimableSupply,
+			MerkleRoot = claimConditions.MerkleRoot,
+			TokenPrice = claimConditions.PricePerToken,
+			WalletLimit = claimConditions.QuantityLimitPerWallet,
+			SupplyClaimed = claimConditions.SupplyClaimed,
+			TokenName = await InternalThirdwebContract.ERC721_Name(),
+			TokenSymbol = await InternalThirdwebContract.ERC721_Symbol(),
+			TotalSupply =  await InternalThirdwebContract.ERC721_TotalSupply(),
+			BalanceOf = await InternalThirdwebContract.ERC721_BalanceOf( await BlockchainClientNode.Instance.smartWallet.GetAddress() ),
+			ClaimConditions = claimConditions,
+		};
+		
 		Log("Setting metadata");
-		CurrencyAddress = claimConditions.Currency;
-		MaxClaimable = claimConditions.MaxClaimableSupply;
-		MerkleRoot = claimConditions.MerkleRoot;
-		TokenPrice = claimConditions.PricePerToken;
-		WalletLimit = claimConditions.QuantityLimitPerWallet;
-		SupplyClaimed = claimConditions.SupplyClaimed;
+
 		
 		// check to see if the currency address is the native currency of the chain
 		// if it is, then we need to get the native currency information
-		if (string.Equals(CurrencyAddress.ToLower(), "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE".ToLower(),
+		if (string.Equals(metadata.CurrencyAddress.ToLower(), "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE".ToLower(),
 			    StringComparison.Ordinal))
 		{
-			var chainData = await Utils.FetchThirdwebChainDataAsync(BlockchainClientNode.Instance.internalClient,
+			var chainData = await Utils.GetChainMetadata(BlockchainClientNode.Instance.internalClient,
 				ContractResource.chainId);
 
-			_currencySymbol = chainData.NativeCurrency.Symbol;
-			CurrencyDecimals = chainData.NativeCurrency.Decimals;
-			CurrencyIcon = chainData.Icon.Url;
+			metadata.CurrencySymbol = chainData.NativeCurrency.Symbol;
+			metadata.CurrencyDecimals = chainData.NativeCurrency.Decimals;
+			metadata.CurrencyIcon = chainData.Icon.Url;
 		}
 		else
 		{
 			// get information about the currency required to claim the token
-			ThirdwebCurrencyContract = await ThirdwebContract.Create(
+			metadata.ThirdwebCurrencyContract = await ThirdwebContract.Create(
 				client: BlockchainClientNode.Instance.internalClient,
-				address: CurrencyAddress,
+				address: metadata.CurrencyAddress,
 				chain: ContractResource.chainId
 			);
-			_currencySymbol = await ThirdwebCurrencyContract.ERC20_Symbol();
-
-			CurrencyDecimals = await ThirdwebCurrencyContract.ERC20_Decimals();
+			metadata.CurrencySymbol = await metadata.ThirdwebCurrencyContract.ERC20_Symbol();
+			metadata.CurrencyDecimals = await metadata.ThirdwebCurrencyContract.ERC20_Decimals();
+			metadata.CurrencyContract = metadata.ThirdwebCurrencyContract;
 		}
 
-		Log("Claim conditions: " + CurrencyAddress + " MaxClaimable: " + MaxClaimable + " TokenPrice: " + TokenPrice + "("+ _currencySymbol +") WalletLimit: " + WalletLimit + " SupplyClaimed: " + SupplyClaimed );
+		Log("Claim conditions: " + metadata.CurrencyAddress + " MaxClaimable: " + metadata.MaxClaimable + " TokenPrice: " + metadata.TokenPrice + "("+ metadata.CurrencySymbol +") WalletLimit: " + metadata.WalletLimit + " SupplyClaimed: " + metadata.SupplyClaimed );
 	
-		return claimConditions;
+		return metadata;
 	}    
-    
-
-    public async Task<string> TokenName()
-    {
-        _tokenName = await InternalThirdwebContract.ERC721_Name();
-        return _tokenName;
-    }
-
-    public async Task<string> Symbol()
-    {
-        _currencySymbol = await InternalThirdwebContract.ERC721_Symbol();
-        return _currencySymbol;
-    }    
-
-	public async Task<BigInteger> TotalSupply(  )
-	{
-		_totalSupply = await InternalThirdwebContract.ERC721_TotalSupply();
-
-		return _totalSupply;
-	}
-
-	public async Task<BigInteger> BalanceOf( )
-	{
-		_balanceOf = await InternalThirdwebContract.ERC721_BalanceOf( await BlockchainClientNode.Instance.smartWallet.GetAddress() );
-		return _balanceOf;
-	}
-
+	
+	
 	public async Task<BigInteger> BalanceOf( string address )
 	{
-		_balanceOf = await InternalThirdwebContract.ERC721_BalanceOf( address );
-		return _balanceOf;
+		return await InternalThirdwebContract.ERC721_BalanceOf( address );
 	}
 
     public async Task<string> OwnerOf( BigInteger tokenId )
     {
         return await InternalThirdwebContract.ERC721_OwnerOf( tokenId );
     }
+    
+    public async Task<ThirdwebTransactionReceipt> Claim( BigInteger quantity )
+    {
+	    return await InternalThirdwebContract.DropERC721_Claim( BlockchainClientNode.Instance.smartWallet, 
+		    await BlockchainClientNode.Instance.smartWallet.GetAddress(), 
+		    quantity );
+    }	
+    
+    public async Task<ThirdwebTransactionReceipt> SafeTransferFrom( string fromAddress, string toAddress, BigInteger amount )
+    {
+	    return await InternalThirdwebContract.ERC721_SafeTransferFrom( BlockchainClientNode.Instance.smartWallet, fromAddress, toAddress, amount );
+    }
 
+    /*
     public async Task<NFT> GetNFT( BigInteger tokenId )
     {
+	    Log("Getting nft " + tokenId );
         return await InternalThirdwebContract.ERC721_GetNFT( tokenId );
     }
 
     // returns all of the NFTs owned by the current wallet for this particular contract
     public async Task<List<NFT>> GetOwnedNFTs()
     {
-        return await InternalThirdwebContract.ERC721_GetOwnedNFTs( await BlockchainClientNode.Instance.smartWallet.GetAddress());    
+	    var owner = await BlockchainClientNode.Instance.smartWallet.GetAddress();
+	    Log("Getting nfts of owner " + owner );
+        return await InternalThirdwebContract.ERC721_GetOwnedNFTs( owner );    
     }
 
     // returns all of the NFTs owned by the passed wallet address for this particular contract
@@ -187,23 +189,7 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
         return await InternalThirdwebContract.ERC721_GetOwnedNFTs( walletAddress );    
     }  
 
-	public async Task<ThirdwebTransactionReceipt> Claim( BigInteger quantity )
-	{
-		return await InternalThirdwebContract.DropERC721_Claim( BlockchainClientNode.Instance.smartWallet, 
-                                                await BlockchainClientNode.Instance.smartWallet.GetAddress(), 
-                                                quantity );
-	}	
 
-    public async Task<ThirdwebTransactionReceipt> Transfer( string fromAddress, string toAddress, BigInteger tokenId )
-    {
-        return await InternalThirdwebContract.ERC721_SafeTransferFrom( BlockchainClientNode.Instance.smartWallet, fromAddress, toAddress, tokenId );
-    }
-
-
-	public async Task<ThirdwebTransactionReceipt> SafeTransferFrom( string fromAddress, string toAddress, BigInteger amount )
-	{
-		return await InternalThirdwebContract.ERC721_SafeTransferFrom( BlockchainClientNode.Instance.smartWallet, fromAddress, toAddress, amount );
-	}
 
     public async Task<byte[]> GetNFTImage( NFT nft )
     {
@@ -282,13 +268,13 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 
     public async Task<AudioStreamMP3> GetNFTAsAudioStreamMP3(NFT nft)
     {
+	    Log("Getting NFT as audio stream: " + nft.Metadata.Name);
+	    Log("Getting NFT as audio stream: " + nft.Metadata.Description);
+	    Log("Getting NFT as audio stream URL: " + nft.Metadata.AnimationUrl);	    
+	    
         byte[] downloadedData = await ThirdwebStorage.Download<byte[]>(BlockchainClientNode.Instance.internalClient, 
                                                                         nft.Metadata.AnimationUrl);		
-
-        Log("Getting NFT as audio stream: " + nft.Metadata.Name);
-        Log("Getting NFT as audio stream: " + nft.Metadata.Description);
-        Log("Getting NFT as audio stream URL: " + nft.Metadata.AnimationUrl);
-
+        
         Log("Received bytes for audio: " + downloadedData.Length);
 
         var audioStream = new AudioStreamMP3();
@@ -313,6 +299,10 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 
     public async Task<byte[]> GetNFTAsByteArray(NFT nft)
     {
+	    Log("Getting NFT as bytearray: " + nft.Metadata.Name);
+	    Log("Getting NFT as bytearray: " + nft.Metadata.Description);
+	    Log("Getting NFT as audio stream URL: " + nft.Metadata.AnimationUrl);
+	    
         byte[] downloadedData = await ThirdwebStorage.Download<byte[]>(BlockchainClientNode.Instance.internalClient, 
                                                                         nft.Metadata.AnimationUrl);		
 
@@ -320,5 +310,6 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 
         return downloadedData;
     } 
+    */
 
 }

@@ -1,3 +1,8 @@
+using System.Numerics;
+using System.Threading.Tasks;
+using Godot;
+using Thirdweb;
+
 namespace BIGConnect.addons.godotblockchain.utils;
 
 static class TokenUtils {
@@ -28,6 +33,11 @@ static class TokenUtils {
         
         return "Unknown";		
 	}
+    
+    private static void Log( string message )
+    {
+        BlockchainLogManager.Instance.EmitLog("TokenUtils: " + message);
+    } 
 
    private static bool MatchSignature(byte[] fileBytes, byte[] signature)
     {
@@ -38,4 +48,120 @@ static class TokenUtils {
         }
         return true;
     }
+
+    public static async Task<byte[]> GetNFTImage( NFT nft )
+    {
+        return await ThirdwebExtensions.GetNFTImageBytes( nft, BlockchainClientNode.Instance.internalClient );
+    }
+
+	public static async Task<Sprite2D> GetNFTAsSprite2D( ThirdwebContract contract, BigInteger nftId  )
+    {
+        NFT nft = await contract.ERC1155_GetNFT( nftId );
+
+        return await GetNFTAsSprite2D( nft );
+    }
+
+    public static async Task<ImageTexture> GetNFTAsTexture( ThirdwebContract contract, BigInteger nftId )
+    {
+        NFT nft = await contract.ERC1155_GetNFT( nftId );
+
+        return await GetNFTAsTexture( nft );
+    }    
+
+    public static async Task<StandardMaterial3D> GetNFTAsStandardMaterial3D( ThirdwebContract contract, BigInteger nftId )
+    {
+        NFT nft = await contract.ERC1155_GetNFT( nftId );
+
+        return await GetNFTAsStandardMaterial3D( nft );
+    }
+
+    public static async Task<StandardMaterial3D> GetNFTAsStandardMaterial3D( NFT nft )
+    {
+        ImageTexture texture = await GetNFTAsTexture( nft );
+
+        StandardMaterial3D material = new StandardMaterial3D();
+        material.AlbedoTexture = texture;
+
+        return material;
+    }
+
+    public static async Task<Sprite2D> GetNFTAsSprite2D( NFT nft )
+    {
+        ImageTexture texture = await GetNFTAsTexture(nft );
+        
+        Sprite2D sprite = new Sprite2D();
+        sprite.Texture = texture;
+
+        return sprite;        
+    }
+
+    public static async Task<ImageTexture> GetNFTAsTexture(NFT nft )
+    {
+        byte[] nftImageBytes = await nft.GetNFTImageBytes(BlockchainClientNode.Instance.internalClient);
+
+        StreamPeerBuffer stream = new StreamPeerBuffer();
+        stream.DataArray = nftImageBytes;
+
+        Image image = new Image();
+
+        if ( TokenUtils.GetFileType(nftImageBytes) == TokenUtils.PNG )
+        {
+            image.LoadPngFromBuffer(nftImageBytes);
+        }
+        else if ( TokenUtils.GetFileType(nftImageBytes) == TokenUtils.JPEG )
+        {
+            image.LoadJpgFromBuffer(nftImageBytes);
+        }
+        else
+        {
+            Log("Unknown or unsupported media type for NFT image - returning empty sprite");
+            return new ImageTexture();
+        }
+
+        ImageTexture texture = new ImageTexture();
+        texture.SetImage(image);
+
+        return texture;
+    }
+
+    public static async Task<AudioStreamMP3> GetNFTAsAudioStreamMP3(NFT nft)
+    {
+        byte[] downloadedData = await ThirdwebStorage.Download<byte[]>(BlockchainClientNode.Instance.internalClient, 
+                                                                        nft.Metadata.AnimationUrl);		
+
+        Log("Getting NFT as audio stream: " + nft.Metadata.Name);
+        Log("Getting NFT as audio stream: " + nft.Metadata.Description);
+        Log("Getting NFT as audio stream URL: " + nft.Metadata.AnimationUrl);
+
+        Log("Received bytes for audio: " + downloadedData.Length);
+
+        var audioStream = new AudioStreamMP3();
+        audioStream.Data = downloadedData;
+
+        return audioStream;
+    }
+
+    public static async Task<AudioStreamMP3> GetNFTAsAudioStreamMP3(ThirdwebContract contract, int nftId)
+    {
+        NFT nft = await contract.ERC1155_GetNFT( nftId );
+        
+        return await GetNFTAsAudioStreamMP3(nft);
+    }
+
+    public static async Task<byte[]> GetNFTAsByteArray(ThirdwebContract contract, int nftId)
+    {
+        NFT nft = await contract.ERC1155_GetNFT( nftId );
+
+        return await GetNFTAsByteArray(nft);
+    }
+
+    public static async Task<byte[]> GetNFTAsByteArray(NFT nft)
+    {
+        byte[] downloadedData = await ThirdwebStorage.Download<byte[]>(BlockchainClientNode.Instance.internalClient, 
+                                                                        nft.Metadata.AnimationUrl);		
+
+        Log("Received bytes for audio: " + downloadedData.Length);
+
+        return downloadedData;
+    } 
 }

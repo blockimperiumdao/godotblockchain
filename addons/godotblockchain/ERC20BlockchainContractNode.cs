@@ -12,29 +12,31 @@ public partial class ERC20BlockchainContractNode : BlockchainContractNode
 	[Signal]
 	public delegate void ERC20BlockchainContractInitializedEventHandler();
 
-	private string _tokenName;
-	private string _symbol;
-	private BigInteger _totalSupply;
-	private BigInteger _balanceOf;
+	public class ERC20TokenMetadata
+	{
+		internal BigInteger BalanceOf { get; set; }
+		public string CurrencyAddress { get; internal set; }
+		public string CurrencyIcon { get; internal set; }
+		public BigInteger CurrencyDecimals { get; internal set; }
+		public BigInteger MaxClaimable { get; internal set; }
+		public  byte[] MerkleRoot { get; internal set; }
+		public BigInteger TokenPrice { get; internal set; }
+		public BigInteger WalletLimit { get; internal set; }
+		public BigInteger SupplyClaimed { get; internal set; }
+		public string CurrencySymbol { get; internal set; }
+		public BigInteger TotalSupply { get; internal set; }
+		public string TokenName { get; internal set; }
+		public string TokenSymbol { get; internal set; }
+		public BigInteger TokenDecimals { get; internal set; }
+		
+		public Drop_ClaimCondition ClaimConditions { get; internal set; }
+		
+		public ThirdwebContract CurrencyContract { get; internal set; }
+	}
+	
+	public ThirdwebContract ThirdwebCurrencyContract { get; internal set; }
 
-	private string CurrencyAddress { get; set; }
-    
-	private string CurrencyIcon { get; set; }
-    
-	private ThirdwebContract ThirdwebCurrencyContract { get; set; }
-
-	public BigInteger CurrencyDecimals { get; private set; }
-
-	private BigInteger MaxClaimable { get; set; }
-	private byte[] MerkleRoot { get; set; }
-	private BigInteger TokenPrice { get; set; }
-	private BigInteger WalletLimit { get; set; }
-	private BigInteger SupplyClaimed { get; set; }
-
-	private string CurrencySymbol { get; set; }
-
-	private int TokenDecimals { get; set; }
-
+	
 	public override void _Ready()
 	{
 		if (ContractResource == null)
@@ -44,12 +46,11 @@ public partial class ERC20BlockchainContractNode : BlockchainContractNode
 		}
 		else
 		{
-			Log("initializing contract");
+			Log("ERC20 initializing contract " + ContractResource.contractAddress);
 			Initialize();
 		}
 
 		AddToGroup("Blockchain", true);
-
 	}
 
 	private new async void Initialize()
@@ -66,7 +67,6 @@ public partial class ERC20BlockchainContractNode : BlockchainContractNode
 			chain: ContractResource.chainId
 		);
 
-
 		// emit a signal so systems will know that we are ready
 		//
 		if (InternalThirdwebContract != null )
@@ -81,98 +81,73 @@ public partial class ERC20BlockchainContractNode : BlockchainContractNode
 	} 
 
 	// fills the node with the metadata from the Blockchain based on the active (i.e. currently use) claim condition
-	public async Task<Drop_ClaimCondition> FetchMetadata()
+	public async Task<ERC20TokenMetadata> FetchMetadata()
 	{
 		Log("Getting claim conditions");
 
-		if (InternalThirdwebContract != null)
+		if (InternalThirdwebContract == null)
 		{
-			Log("Contract is not null");
+			GD.Print("InternalThirdWebContract is null");
+			return null;
 		}
-		else
-		{
-			Log("Contract is null");
-		}
-		var claimConditions = await InternalThirdwebContract.DropERC20_GetActiveClaimCondition( );
+		var claimConditions = await InternalThirdwebContract.DropERC20_GetActiveClaimCondition();
 		GD.Print(claimConditions.ToString());
-
+		
 		Log("Setting metadata");
-		CurrencyAddress = claimConditions.Currency;
-		MaxClaimable = claimConditions.MaxClaimableSupply;
-		MerkleRoot = claimConditions.MerkleRoot;
-		TokenPrice = claimConditions.PricePerToken;
-		WalletLimit = claimConditions.QuantityLimitPerWallet;
-		SupplyClaimed = claimConditions.SupplyClaimed;
+
+		ERC20TokenMetadata metadata = new ERC20TokenMetadata()
+		{
+			ClaimConditions = claimConditions,
+			CurrencyAddress = claimConditions.Currency,
+			MaxClaimable = claimConditions.MaxClaimableSupply,
+			MerkleRoot = claimConditions.MerkleRoot,
+			TokenPrice = claimConditions.PricePerToken,
+			WalletLimit = claimConditions.QuantityLimitPerWallet,
+			SupplyClaimed = claimConditions.SupplyClaimed,
+
+			BalanceOf = await InternalThirdwebContract.ERC20_BalanceOf( await BlockchainClientNode.Instance.smartWallet.GetAddress() ),
+
+			TotalSupply = await InternalThirdwebContract.ERC20_TotalSupply(),
+			TokenName = await InternalThirdwebContract.ERC20_Name(),
+			TokenSymbol = await InternalThirdwebContract.ERC20_Symbol(),
+			TokenDecimals = await InternalThirdwebContract.ERC20_Decimals()
+		};
 		
 		// check to see if the currency address is the native currency of the chain
 		// if it is, then we need to get the native currency information
-		if (string.Equals(CurrencyAddress.ToLower(), "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE".ToLower(),
+		if (string.Equals(metadata.CurrencyAddress.ToLower(), "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE".ToLower(),
 			    StringComparison.Ordinal))
 		{
-			var chainData = await Utils.FetchThirdwebChainDataAsync(BlockchainClientNode.Instance.internalClient,
+			var chainData = await Utils.GetChainMetadata(BlockchainClientNode.Instance.internalClient,
 				ContractResource.chainId);
 
-			CurrencySymbol = chainData.NativeCurrency.Symbol;
-			CurrencyDecimals = chainData.NativeCurrency.Decimals;
-			CurrencyIcon = chainData.Icon.Url;
+			metadata.CurrencySymbol = chainData.NativeCurrency.Symbol;
+			metadata.CurrencyDecimals = chainData.NativeCurrency.Decimals;
+			metadata.CurrencyIcon = chainData.Icon.Url;
 		}
 		else
 		{
 			// get information about the currency required to claim the token
 			ThirdwebCurrencyContract = await ThirdwebContract.Create(
 				client: BlockchainClientNode.Instance.internalClient,
-				address: CurrencyAddress,
+				address: metadata.CurrencyAddress,
 				chain: ContractResource.chainId
 			);
-			CurrencySymbol = await ThirdwebCurrencyContract.ERC20_Symbol();
-
-			CurrencyDecimals = await ThirdwebCurrencyContract.ERC20_Decimals();
+			metadata.CurrencySymbol = await ThirdwebCurrencyContract.ERC20_Symbol();
+			metadata.CurrencyDecimals = await ThirdwebCurrencyContract.ERC20_Decimals();
+			metadata.CurrencyContract = ThirdwebCurrencyContract;
 		}
 
-		Log("Claim conditions: " + CurrencyAddress + " MaxClaimable: " + MaxClaimable + " TokenPrice: " + TokenPrice + "("+ CurrencySymbol +") WalletLimit: " + WalletLimit + " SupplyClaimed: " + SupplyClaimed );
+		Log("Claim conditions: " + metadata.CurrencyAddress + " MaxClaimable: " + metadata.MaxClaimable + " TokenPrice: " + metadata.TokenPrice + "("+ metadata.CurrencySymbol +") WalletLimit: " + metadata.WalletLimit + " SupplyClaimed: " + metadata.SupplyClaimed );
 	
-		return claimConditions;
+		return metadata;
 	}
-
-	public async Task<BigInteger> BalanceOf(  )
-	{
-		_balanceOf = await InternalThirdwebContract.ERC20_BalanceOf( await BlockchainClientNode.Instance.smartWallet.GetAddress() );
-		return _balanceOf;
-	}
-
+	
 	public async Task<BigInteger> BalanceOf( string address )
 	{
-		_balanceOf = await InternalThirdwebContract.ERC20_BalanceOf( address );
-		return _balanceOf;
+		return  await InternalThirdwebContract.ERC20_BalanceOf( address );
 	}	
-
-	public async Task<BigInteger> TotalSupply(  )
-	{
-		_totalSupply = await InternalThirdwebContract.ERC20_TotalSupply();
-
-		return _totalSupply;
-	}
-	public async Task<string> TokenName(  )
-	{
-		_tokenName = await InternalThirdwebContract.ERC20_Name();
-
-		return _tokenName;
-	}
-
-	public async Task<string> Symbol(  )
-	{
-		_symbol = await InternalThirdwebContract.ERC20_Symbol();
-
-		return _symbol;
-	}
-
-	public async Task<int> Decimals(  )
-	{
-		TokenDecimals = await InternalThirdwebContract.ERC20_Decimals();
-
-		return TokenDecimals;
-	}
-
+	
 	public async Task<ThirdwebTransactionReceipt> Claim( string amount )
 	{
 		return await InternalThirdwebContract.DropERC20_Claim( BlockchainClientNode.Instance.smartWallet, await BlockchainClientNode.Instance.smartWallet.GetAddress(), amount );

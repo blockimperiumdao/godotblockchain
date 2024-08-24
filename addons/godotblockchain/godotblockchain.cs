@@ -4,7 +4,7 @@ using Godot;
 namespace BIGConnect.addons.godotblockchain;
 
 [Tool]
-public partial class godotblockchain : EditorPlugin
+public partial class GodotBlockchain : EditorPlugin
 {
 	public override void _EnterTree()
 	{		
