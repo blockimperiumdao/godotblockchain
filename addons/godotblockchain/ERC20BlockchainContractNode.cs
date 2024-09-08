@@ -1,6 +1,7 @@
 using System;
 using System.Numerics;
 using System.Threading.Tasks;
+using BIGConnect.addons.godotblockchain.utils;
 using Godot;
 using Thirdweb;
 
@@ -90,7 +91,7 @@ public partial class ERC20BlockchainContractNode : BlockchainContractNode
 			GD.Print("InternalThirdWebContract is null");
 			return null;
 		}
-		var claimConditions = await InternalThirdwebContract.DropERC20_GetActiveClaimCondition();
+		Drop_ClaimCondition claimConditions = await InternalThirdwebContract.DropERC20_GetActiveClaimCondition();
 		GD.Print(claimConditions.ToString());
 		
 		Log("Setting metadata");
@@ -115,7 +116,7 @@ public partial class ERC20BlockchainContractNode : BlockchainContractNode
 		
 		// check to see if the currency address is the native currency of the chain
 		// if it is, then we need to get the native currency information
-		if (string.Equals(metadata.CurrencyAddress.ToLower(), "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE".ToLower(),
+		if (string.Equals(metadata.CurrencyAddress.ToLower(), TokenUtils.THIRDWEB_CHAIN_NATIVE_TOKEN.ToLower(),
 			    StringComparison.Ordinal))
 		{
 			var chainData = await Utils.GetChainMetadata(BlockchainClientNode.Instance.internalClient,

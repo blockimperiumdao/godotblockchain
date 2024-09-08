@@ -11,6 +11,8 @@ static class TokenUtils {
 	public const string BASE_AERO_TOKEN = "0x940181a94a35a4569e4529a3cdfb74e38fd98631";
 	public const string BASE_TESTNET_PAPER_TOKEN = "0xd4b856A271dd46845D924Ae72a4e9b890128cbA7";
 
+    public const string THIRDWEB_CHAIN_NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+
     private static readonly byte[] PngSignature = new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
     private static readonly byte[] JpegSignature = new byte[] { 0xFF, 0xD8, 0xFF };
     private static readonly byte[] Mp3Signature = new byte[] { 0x49, 0x44, 0x33 }; // ID3 tag

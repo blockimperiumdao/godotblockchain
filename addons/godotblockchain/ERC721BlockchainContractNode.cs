@@ -117,7 +117,7 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 		
 		// check to see if the currency address is the native currency of the chain
 		// if it is, then we need to get the native currency information
-		if (string.Equals(metadata.CurrencyAddress.ToLower(), "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE".ToLower(),
+		if (string.Equals(metadata.CurrencyAddress.ToLower(), TokenUtils.THIRDWEB_CHAIN_NATIVE_TOKEN.ToLower(),
 			    StringComparison.Ordinal))
 		{
 			var chainData = await Utils.GetChainMetadata(BlockchainClientNode.Instance.internalClient,
