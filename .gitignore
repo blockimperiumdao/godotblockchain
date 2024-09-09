@@ -4,3 +4,4 @@ android/
 big_client_configuration.tres
 *.DS_Store
 .DS_Store
+.idea/

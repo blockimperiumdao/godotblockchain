@@ -41,6 +41,17 @@ public partial class ERC1155BlockchainContractNode : BlockchainContractNode
 	
 	public override void _Ready()
 	{
+		if (ContractResource == null)
+		{
+			Log("ERC1155 contractResource is null");
+			return;
+		}
+		else
+		{
+			Log("ERC1155 initializing contract " + ContractResource.contractAddress);
+			Initialize();
+		}
+
 		AddToGroup("Blockchain", true);
 	}
 
