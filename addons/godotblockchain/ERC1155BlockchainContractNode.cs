@@ -4,9 +4,9 @@ using Godot;
 using Thirdweb;
 using System.Numerics;
 using System.Collections.Generic;
-using BIGConnect.addons.godotblockchain.utils;
+using GodotBlockchain.addons.godotblockchain.utils;
 
-namespace BIGConnect.addons.godotblockchain;
+namespace GodotBlockchain.addons.godotblockchain;
 
 [GlobalClass,Tool]
 public partial class ERC1155BlockchainContractNode : BlockchainContractNode
@@ -110,7 +110,8 @@ public partial class ERC1155BlockchainContractNode : BlockchainContractNode
 
 	    // check to see if the currency address is the native currency of the chain
 	    // if it is, then we need to get the native currency information
-	    if (string.Equals(metadata.CurrencyAddress.ToLower(), TokenUtils.THIRDWEB_CHAIN_NATIVE_TOKEN.ToLower(),
+	    if (string.Equals(metadata.CurrencyAddress.ToLower(), 
+			TokenUtils.THIRDWEB_CHAIN_NATIVE_TOKEN.ToLower(),
 		        StringComparison.Ordinal))
 	    {
 		    var chainData = await Utils.GetChainMetadata(BlockchainClientNode.Instance.internalClient,

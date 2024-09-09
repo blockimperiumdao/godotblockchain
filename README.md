@@ -3,11 +3,13 @@
 
 ## Overview
 
-The BlockImperiumGames (BIG) Godot Blockchain plugin is a game specific optimization of the Thirdweb .NET SDK speifically tailored for games built with the opensource Godot 
+The BlockImperiumGames (BIG) Godot Blockchain plugin is a game specific optimization of the Thirdweb .NET SDK (https://github.com/thirdweb-dev/thirdweb-dotnet/) specifically tailored for games built with the opensource Godot 
 gaming engine. It simplifies the integration of Web3 functionality into a game with a specific focus on the behaviors typically need for game developers (query token, 
-purchase/load NFTs, etc) all while operating in the traditional Godot Node/Composition architecture to make this compatible with existing tools and Visual Programming solutions.
+purchase/load NFTs, etc.) all while operating in the traditional Godot Node/Composition architecture to make this compatible with existing tools and Visual Programming solutions.
 
-This project is offered under the LGPL Version 3 (https://www.gnu.org/licenses/lgpl-3.0.txt). A copy of the license for this project is in the license file atached to this project.
+This project is offered under the LGPL Version 3 (https://www.gnu.org/licenses/lgpl-3.0.txt). A copy of the license for this project is in the license file attached to this project.
+
+A full test project is not included in the repository, but exists in a project called BIGTest (https://github.com/blockimperiumdao/BIGTest).
 
 ## Features
 
@@ -38,7 +40,7 @@ Version 0.8.0, Adds functionality for processing NFTs from an ERC721BlockchainCo
 </ItemGroup>
 ```
 
-An complete csproj file might look like
+A complete csproj file might look like
 ```
 <Project Sdk="Godot.NET.Sdk/4.3.0">
   <PropertyGroup>
@@ -75,7 +77,7 @@ Note - this will create a complete example project. You may ignore functionality
 
 2/ Create and deploy ManagedAccountFactory contract - keep track of the address. This is what will handle users creating accounts with OAuth, Email, Blockchain wallets, etc.
 
-3/ In Thirdweb, create an Token Contract (note - not a token drop). This represents an ERC20 contract that is a currency token. You can create more of these later.
+3/ In Thirdweb, create a Token Contract (note - not a token drop). This represents an ERC20 contract that is a currency token. You can create more of these later.
 
 4/ In godot create a new project. 
 
@@ -85,11 +87,11 @@ Note - this will create a complete example project. You may ignore functionality
 
 >b/ Select the ChainID of the Blockchain that your Wallet Factor is on
 
->c/ Provide a bundle id for your project (your Thirdweb configuration should whitelist this bundleid)
+>c/ Provide a bundle id for your project (your Thirdweb configuration should whitelist this bundle id)
 
 >d/ Provide the ClientID from your Thirdweb Configuration
 
->e/ Check the box if you want these transactions to be gasless (consult Thirdweb documentation for this setting)
+>e/ Check the box if you want these transactions to be gas-less (consult Thirdweb documentation for this setting)
 
 6/ Create a TextEdit for the email address and the one time password (OTP) that will be sent to the email address to confirm the users email address.
 
@@ -129,7 +131,7 @@ bool success = await BlockchainClientNode.Instance.OnOTPSubmit( otpTextEntry.Tex
 ```
 ### Creating Smart Wallets
 
-The second let's you know that the InAppWallet for the users email address has been created. Generally you would create the user's SmartWallet at this point with a call to
+The second lets you know that the InAppWallet for the users email address has been created. Generally you would create the user's SmartWallet at this point with a call to
 
 ```
 await BlockchainClientNode.Instance.CreateSmartWallet( );
@@ -152,7 +154,7 @@ Similar to how you interact with the BlockchainClientNode to get information abo
 currencyContract.ERC20BlockchainContractInitialized += OnERC20BlockchainContractInitialized;
 ```
 
-In this case we are listning to the ERC20BlockchainContractNode and waiting for it to be initialized so we can read information about it. We can get things like the users balance, the name of the symbol for this contract, etc.
+In this case we are listening to the ERC20BlockchainContractNode and waiting for it to be initialized so we can read information about it. We can get things like the users balance, the name of the symbol for this contract, etc.
 
 ```
 public async void OnERC20BlockchainContractInitialized()

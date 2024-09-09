@@ -1,7 +1,7 @@
 using Godot;
 
 
-namespace BIGConnect.addons.godotblockchain;
+namespace GodotBlockchain.addons.godotblockchain;
 
 [GlobalClass,Tool]
 public partial class BlockchainContractResource : Resource

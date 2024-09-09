@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Godot;
 using Thirdweb;
 
-namespace BIGConnect.addons.godotblockchain.utils;
+namespace GodotBlockchain.addons.godotblockchain.utils;
 
 static class TokenUtils {
 	public const string BASE_USDC_TOKEN = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";

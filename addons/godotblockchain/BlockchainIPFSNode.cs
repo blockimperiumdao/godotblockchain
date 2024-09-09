@@ -3,7 +3,7 @@ using Thirdweb;
 
 
 
-namespace BIGConnect.addons.godotblockchain;
+namespace GodotBlockchain.addons.godotblockchain;
 
 [GlobalClass,Tool]
 

@@ -3,7 +3,7 @@ using Godot;
 using Thirdweb;
 using System.Numerics;
 
-namespace BIGConnect.addons.godotblockchain;
+namespace GodotBlockchain.addons.godotblockchain;
 
 [GlobalClass,Tool]
 public partial class BlockchainContractNode : Node

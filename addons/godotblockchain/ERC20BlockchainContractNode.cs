@@ -1,11 +1,11 @@
 using System;
 using System.Numerics;
 using System.Threading.Tasks;
-using BIGConnect.addons.godotblockchain.utils;
 using Godot;
 using Thirdweb;
+using GodotBlockchain.addons.godotblockchain.utils;
 
-namespace BIGConnect.addons.godotblockchain;
+namespace GodotBlockchain.addons.godotblockchain;
 
 [GlobalClass,Tool]
 public partial class ERC20BlockchainContractNode : BlockchainContractNode

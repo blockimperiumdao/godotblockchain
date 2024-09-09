@@ -3,11 +3,9 @@ using System.Threading.Tasks;
 using Godot;
 using Thirdweb;
 using System.Numerics;
-using System.Collections.Generic;
+using GodotBlockchain.addons.godotblockchain.utils;
 
-using BIGConnect.addons.godotblockchain.utils;
-
-namespace BIGConnect.addons.godotblockchain;
+namespace GodotBlockchain.addons.godotblockchain;
 
 // Rest of the code
 [GlobalClass,Tool]
