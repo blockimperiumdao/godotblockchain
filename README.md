@@ -24,6 +24,9 @@ Version 0.7.0 Optimizations, removal of the BlockchainManager and extracted out 
 
 Version 0.8.0, Adds functionality for processing NFTs from an ERC721BlockchainContract node. This will support returning Sprite2D, ImageTexture, AudioStream, and regular byte[] so you can decode the data stored in the NFT into whatever your workflow supports.
 
+Version 1.0.0, First release of the library. This is a stable release that has been tested in a number of projects. It is recommended that you use this version for your projects.
+
+Version 1.1.0, Initial version supporting loading glb files that are packed into NFTs. While GLTF is "technically" supported, the Thirdweb interface will only support GLB and accordingly - so do we.
 ## Installation
 
 1/ Ensure that you have the .NET SDK installed. Version 7.0 or later is recommended for this project.
