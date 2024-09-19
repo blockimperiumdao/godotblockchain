@@ -17,6 +17,9 @@ public partial class ERC1155BlockchainContractNode : BlockchainContractNode
 
 	public class ERC1155TokenMetadata
 	{
+		public string TokenName { get; internal set; }
+		
+		public string TokenDescription { get; internal set; }
 		public BigInteger TotalSupply { get; internal set; }
 		public BigInteger BalanceOf { get; internal set; }
 		
@@ -104,8 +107,8 @@ public partial class ERC1155BlockchainContractNode : BlockchainContractNode
 	    Log("Getting claim conditions for " + tokenId );
 
 	    if (InternalThirdwebContract == null) return null;
-	    var claimConditions = await InternalThirdwebContract.DropERC1155_GetActiveClaimCondition( tokenId );
-
+	    Drop_ClaimCondition claimConditions = await InternalThirdwebContract.DropERC1155_GetActiveClaimCondition( tokenId );
+	    
 	    ERC1155TokenMetadata metadata = new ERC1155TokenMetadata
 	    {
 		    CurrencyAddress = claimConditions.Currency,
@@ -116,7 +119,9 @@ public partial class ERC1155BlockchainContractNode : BlockchainContractNode
 		    SupplyClaimed = claimConditions.SupplyClaimed,
 		    ClaimConditions = claimConditions,
 		    BalanceOf = await InternalThirdwebContract.ERC1155_BalanceOf( await BlockchainClientNode.Instance.smartWallet.GetAddress(), tokenId ),
-		    TotalSupply = await InternalThirdwebContract.ERC1155_TotalSupply( tokenId )
+		    TotalSupply = await InternalThirdwebContract.ERC1155_TotalSupply( tokenId ),
+		    TokenName = (await InternalThirdwebContract.ERC1155_GetNFT(tokenId)).Metadata.Name,
+		    TokenDescription = (await InternalThirdwebContract.ERC1155_GetNFT(tokenId)).Metadata.Description,
 	    };
 
 	    // check to see if the currency address is the native currency of the chain
