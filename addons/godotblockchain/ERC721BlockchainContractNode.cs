@@ -76,7 +76,6 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 
 	public void Log( string message )
 	{
-		//EmitSignal(SignalName.ClientLogMessage, "ERC721BlockchainContractNode: " + message );
 		BlockchainLogManager.Instance.EmitLog("ERC721BlockchainContractNode: " + message);
 	} 
 	
