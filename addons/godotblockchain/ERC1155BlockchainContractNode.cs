@@ -104,9 +104,14 @@ public partial class ERC1155BlockchainContractNode : BlockchainContractNode
     // fills the node with the metadata from the Blockchain based on the active (i.e. currently use) claim condition
     public async Task<ERC1155TokenMetadata> FetchMetadataForToken(BigInteger tokenId)
     {
-	    Log("Getting claim conditions for " + tokenId );
+	    Log("Getting claim conditions for tokenId " + tokenId );
 
-	    if (InternalThirdwebContract == null) return null;
+	    if (InternalThirdwebContract == null)
+	    {
+		    Log("InternalThirdwebContract is null");
+		    return null;
+	    }
+	    
 	    Drop_ClaimCondition claimConditions = await InternalThirdwebContract.DropERC1155_GetActiveClaimCondition( tokenId );
 	    
 	    ERC1155TokenMetadata metadata = new ERC1155TokenMetadata
@@ -123,6 +128,8 @@ public partial class ERC1155BlockchainContractNode : BlockchainContractNode
 		    TokenName = (await InternalThirdwebContract.ERC1155_GetNFT(tokenId)).Metadata.Name,
 		    TokenDescription = (await InternalThirdwebContract.ERC1155_GetNFT(tokenId)).Metadata.Description,
 	    };
+	    
+	    Log("Claim conditions: " + metadata.CurrencyAddress + " MaxClaimable: " + metadata.MaxClaimable + " TokenPrice: " + metadata.TokenPrice + " WalletLimit: " + metadata.WalletLimit + " SupplyClaimed: " + metadata.SupplyClaimed );
 
 	    // check to see if the currency address is the native currency of the chain
 	    // if it is, then we need to get the native currency information

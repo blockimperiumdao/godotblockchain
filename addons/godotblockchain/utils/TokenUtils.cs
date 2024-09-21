@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
 using Godot;
@@ -49,6 +50,70 @@ static class TokenUtils {
                 return false;
         }
         return true;
+    }
+
+    public static async Task<List<NFT>> GetOwnedNFTsFromContractNode(Node contractNode)
+    {
+        switch (contractNode)
+        {
+            case ERC1155BlockchainContractNode erc1155Node:
+            {
+                Log("Getting Owned NFTs from ERC1155 contract node");
+                return await erc1155Node.InternalThirdwebContract.ERC1155_GetOwnedNFTs( await BlockchainClientNode.Instance.smartWallet.GetAddress());
+            }
+            case ERC721BlockchainContractNode erc721Node:
+            {
+                Log("Getting Owned NFTs from ERC721 contract node");
+                return await erc721Node.InternalThirdwebContract.ERC721_GetOwnedNFTs( await BlockchainClientNode.Instance.smartWallet.GetAddress());
+            }
+            default:
+            {
+                Log("Unknown contract node type - returning empty NFT list");
+                return new List<NFT>();
+            }
+        }
+    }   
+   
+    public static async Task<List<NFT>> GetAllNFTsFromContractNode(Node contractNode)
+    {
+        switch (contractNode)
+        {
+            case ERC1155BlockchainContractNode erc1155Node:
+            {
+                Log("Getting All NFTs from ERC1155 contract node");
+                return await erc1155Node.InternalThirdwebContract.ERC1155_GetAllNFTs();
+            }
+            case ERC721BlockchainContractNode erc721Node:
+            {
+                Log("Getting All NFTs from ERC721 contract node");
+                return await erc721Node.InternalThirdwebContract.ERC721_GetAllNFTs();
+            }
+            default:
+            {
+                Log("Unknown contract node type - returning empty NFT list");
+                return new List<NFT>();
+            }
+        }
+    }
+   
+    public static async Task<NFT> GetNFTFromContractNode(Node contractNode, BigInteger nftId)
+    {
+        switch (contractNode)
+        {
+            case ERC1155BlockchainContractNode erc1155Node:
+            {
+                return await erc1155Node.InternalThirdwebContract.ERC1155_GetNFT(nftId);
+            }
+            case ERC721BlockchainContractNode erc721Node:
+            {
+                return await erc721Node.InternalThirdwebContract.ERC721_GetNFT(nftId);
+            }
+            default:
+            {
+                Log("Unknown contract node type - returning empty NFT");
+                return new NFT();
+            }
+        }
     }
    
 	public static async Task<Sprite2D> GetERC1155AsSprite2D( ThirdwebContract contract, BigInteger nftId  )
@@ -121,6 +186,20 @@ static class TokenUtils {
 
         return await GetNFTAsByteArray(nft);
     }       
+    
+    public static async Task<Node> GetERC1155AsNode(ThirdwebContract contract, int nftId)
+    {
+        NFT nft = await contract.ERC1155_GetNFT( nftId );
+
+        return await GetNFTAsNode(nft);
+    }
+    
+    public static async Task<Node> GetERC721AsNode(ThirdwebContract contract, int nftId)
+    {
+        NFT nft = await contract.ERC721_GetNFT( nftId );
+
+        return await GetNFTAsNode(nft);
+    }
     
     /**
      * Get the NFT as a byte array using GetNFTImageBytes
@@ -201,23 +280,73 @@ static class TokenUtils {
         return audioStream;
     }
     
-    /**
-     * Get the NFT as a GLTF document
-     */
-    public static async Task<GltfState> GetNFTAsGltfDocument(NFT nft)
+    public static void CacheByteArrayAsGlbFile( byte[] downloadedData, string filePath )
+    {
+        GD.Print("Writing GLTF to: " + filePath);
+        // Write the byte array to the user directory
+        var destinationFile = FileAccess.Open(filePath, FileAccess.ModeFlags.Write);
+        destinationFile.StoreBuffer(downloadedData);
+        destinationFile.Close();          
+    }
+
+    public static async Task<string> CacheNFTAsGlbFile(NFT nft)
     {
         byte[] downloadedData = await GetNFTAsByteArray(nft);
         
+        
+        var userDirectory = OS.GetUserDataDir();
+        var fileName = nft.Metadata.Name.Replace(" ", "");
+        
+        var cachePath = userDirectory + "/cache";
+        
+        if (!System.IO.Directory.Exists(cachePath))
+        {
+            System.IO.Directory.CreateDirectory(cachePath);
+        }
+        
+        var gltfPath = cachePath + "/" + fileName + ".glb";        
+        
+        CacheByteArrayAsGlbFile(downloadedData, gltfPath);
+
+        return gltfPath;
+    }
+    
+    /**
+     * Get the NFT as a GLTFState
+     */
+    public static async Task<Node> GetNFTAsNode(NFT nft)
+    {
+        string cachedFileLocation = await CacheNFTAsGlbFile( nft ); 
+        byte[] downloadedData = await GetNFTAsByteArray(nft);
+
         // Load the GLTF model using GltfDocument
         GltfDocument gltfDocument = new GltfDocument();
         GltfState gltfState = new GltfState();
+        
+        // PackedScene gltfScene = (PackedScene)ResourceLoader.Load(cachedFileLocation);
+        //
+        // if (gltfScene == null)
+        // {
+        //     Log("Error loading GLTF scene");
+        //     return null;
+        // }
+        // else
+        // {
+        //     Node gltfNode = gltfScene.Instantiate();
+        //     
+        //
+        //     Log("Loaded GLTF scene");
+        //     
+        //     return gltfNode;
+        // }
+        
         Error error = gltfDocument.AppendFromBuffer(downloadedData, "", gltfState);
         if (error != Error.Ok)
         {
-            Log("Error loading GLTF document: " + error);
+             Log("Error loading GLTF document: " + error);
         }
 
-        return gltfState;
+        return gltfDocument.GenerateScene(gltfState);
     }    
 
  
