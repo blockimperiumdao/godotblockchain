@@ -109,6 +109,7 @@ public partial class ERC721BlockchainContractNode : BlockchainContractNode
 			ClaimConditions = claimConditions,
 		};
 		
+		
 		Log("Setting metadata");
 
 		

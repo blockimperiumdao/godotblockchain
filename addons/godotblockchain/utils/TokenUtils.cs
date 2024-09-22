@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
 using Godot;
+using Newtonsoft.Json.Linq;
 using Thirdweb;
 
 namespace GodotBlockchain.addons.godotblockchain.utils;
@@ -12,7 +13,7 @@ static class TokenUtils {
 	public const string BASE_AERO_TOKEN = "0x940181a94a35a4569e4529a3cdfb74e38fd98631";
 	public const string BASE_TESTNET_PAPER_TOKEN = "0xd4b856A271dd46845D924Ae72a4e9b890128cbA7";
 
-    public const string THIRDWEB_CHAIN_NATIVE_TOKEN = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+    public const string THIRDWEB_CHAIN_NATIVE_TOKEN = Constants.NATIVE_TOKEN_ADDRESS;
 
     private static readonly byte[] PngSignature = new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
     private static readonly byte[] JpegSignature = new byte[] { 0xFF, 0xD8, 0xFF };
@@ -50,6 +51,76 @@ static class TokenUtils {
                 return false;
         }
         return true;
+    }
+
+    public static Dictionary<string, object> ExtractAttributes(NFT nft)
+    {
+        var attributes = nft.Metadata.Attributes;
+        var extractedAttributes = new Dictionary<string, object>();
+        
+        if ( attributes == null )
+        {
+            Log("Attributes are null - skipping NFT");
+            return null;
+        }
+            
+        JArray jArray = (JArray)attributes;
+        foreach (JObject item in jArray)
+        {
+            var key = item["trait_type"];
+            var value = item["value"];
+                
+            Log("Key: " + key + " Value: " + value);
+            if (key != null && value != null)
+            {
+                extractedAttributes.Add(key.ToString(), value);
+            }
+        }
+
+        return extractedAttributes;
+    }
+   
+    /**
+     * Query NFTs from a contract node based on a dictionary of key-value pairs. This utilizes logical and semantics
+     * for the query. For example, if you pass in a dictionary with two key-value pairs, the NFT must have both key-value.
+     */
+    public static async Task<List<NFT>> QueryNFTsFromContractNode(Node contractNode, Dictionary<string, object> query)
+    {
+        List<NFT> nfts = await GetAllNFTsFromContractNode(contractNode);
+        List<NFT> filteredNFTs = new List<NFT>();
+
+        foreach (var nft in nfts)
+        {
+            Dictionary<string, object> attributes = ExtractAttributes(nft);
+            if (attributes == null)
+            {
+                Log("Attributes are null - skipping NFT");
+                continue;
+            }
+            
+            bool matches = true;
+            foreach (var key in query.Keys)
+            {
+                if (!attributes.ContainsKey(key))
+                {
+                    matches = false;
+                    break;
+                }
+                if (attributes[key].ToString() != query[key].ToString())
+                {
+                    matches = false;
+                    break;
+                }
+            }
+            
+            if (matches)
+            {
+                filteredNFTs.Add(nft);
+            }
+
+        }
+        
+        return filteredNFTs;
     }
 
     public static async Task<List<NFT>> GetOwnedNFTsFromContractNode(Node contractNode)
@@ -114,91 +185,6 @@ static class TokenUtils {
                 return new NFT();
             }
         }
-    }
-   
-	public static async Task<Sprite2D> GetERC1155AsSprite2D( ThirdwebContract contract, BigInteger nftId  )
-    {
-        NFT nft = await contract.ERC1155_GetNFT( nftId );
-
-        return await GetNFTAsSprite2D( nft );
-    }
-
-    public static async Task<ImageTexture> GetERC1155AsTexture( ThirdwebContract contract, BigInteger nftId )
-    {
-        NFT nft = await contract.ERC1155_GetNFT( nftId );
-
-        return await GetNFTAsTexture( nft );
-    }    
-
-    public static async Task<StandardMaterial3D> GetERC1155AsStandardMaterial3D( ThirdwebContract contract, BigInteger nftId )
-    {
-        NFT nft = await contract.ERC1155_GetNFT( nftId );
-
-        return await GetNFTAsStandardMaterial3D( nft );
-    }
-    
-    
-    public static async Task<Sprite2D> GetERC721AsSprite2D( ThirdwebContract contract, BigInteger nftId  )
-    {
-        NFT nft = await contract.ERC721_GetNFT( nftId );
-
-        return await GetNFTAsSprite2D( nft );
-    }
-
-    public static async Task<ImageTexture> GetERC721AsTexture( ThirdwebContract contract, BigInteger nftId )
-    {
-        NFT nft = await contract.ERC721_GetNFT( nftId );
-
-        return await GetNFTAsTexture( nft );
-    }    
-
-    public static async Task<StandardMaterial3D> GetERC721AsStandardMaterial3D( ThirdwebContract contract, BigInteger nftId )
-    {
-        NFT nft = await contract.ERC721_GetNFT( nftId );
-
-        return await GetNFTAsStandardMaterial3D( nft );
-    }    
-    
-    public static async Task<AudioStreamMP3> GetERC1155AsAudioStreamMP3(ThirdwebContract contract, int nftId)
-    {
-        NFT nft = await contract.ERC1155_GetNFT( nftId );
-        
-        return await GetNFTAsAudioStreamMP3(nft);
-    }
-    
-    public static async Task<AudioStreamMP3> GetERC721AsAudioStreamMP3(ThirdwebContract contract, int nftId)
-    {
-        NFT nft = await contract.ERC721_GetNFT( nftId );
-        
-        return await GetNFTAsAudioStreamMP3(nft);
-    }    
-
-    public static async Task<byte[]> GetERC1155AsByteArray(ThirdwebContract contract, int nftId)
-    {
-        NFT nft = await contract.ERC1155_GetNFT( nftId );
-
-        return await GetNFTAsByteArray(nft);
-    }
-    
-    public static async Task<byte[]> GetERC721AsByteArray(ThirdwebContract contract, int nftId)
-    {
-        NFT nft = await contract.ERC721_GetNFT( nftId );
-
-        return await GetNFTAsByteArray(nft);
-    }       
-    
-    public static async Task<Node> GetERC1155AsNode(ThirdwebContract contract, int nftId)
-    {
-        NFT nft = await contract.ERC1155_GetNFT( nftId );
-
-        return await GetNFTAsNode(nft);
-    }
-    
-    public static async Task<Node> GetERC721AsNode(ThirdwebContract contract, int nftId)
-    {
-        NFT nft = await contract.ERC721_GetNFT( nftId );
-
-        return await GetNFTAsNode(nft);
     }
     
     /**
