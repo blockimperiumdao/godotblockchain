@@ -13,20 +13,21 @@ A full test project is not included in the repository, but exists in a project c
 
 ## Features
 
-Version 0.5.0 Removes entirely, the UI components which are now all in the BIGConnect project. This was
-done to make the system more modular and enable users to bring their own UX.
+Version 1.1.0, Initial version supporting loading glb files that are packed into NFTs. While GLTF is "technically" supported, the Thirdweb interface will only support GLB and accordingly - so do we.
+
+Version 1.0.0, First release of the library. This is a stable release that has been tested in a number of projects. It is recommended that you use this version for your projects.
+
+Version 0.8.0, Adds functionality for processing NFTs from an ERC721BlockchainContract node. This will support returning Sprite2D, ImageTexture, AudioStream, and regular byte[] so you can decode the data stored in the NFT into whatever your workflow supports.
+
+Version 0.7.0 Optimizations, removal of the BlockchainManager and extracted out relevant functionality to the BlockchainLogManager which will keep track of history of transactions and logging information.
 
 Version 0.6.0 Optimizations and decoupling of the log management for the client from the BlockchainManagerNode
 so that other components can listen to this via signals as opposed to it going direct
 to a particular node.
 
-Version 0.7.0 Optimizations, removal of the BlockchainManager and extracted out relevant functionality to the BlockchainLogManager which will keep track of history of transactions and logging information.
+Version 0.5.0 Removes entirely, the UI components which are now all in the BIGConnect project. This was
+done to make the system more modular and enable users to bring their own UX.
 
-Version 0.8.0, Adds functionality for processing NFTs from an ERC721BlockchainContract node. This will support returning Sprite2D, ImageTexture, AudioStream, and regular byte[] so you can decode the data stored in the NFT into whatever your workflow supports.
-
-Version 1.0.0, First release of the library. This is a stable release that has been tested in a number of projects. It is recommended that you use this version for your projects.
-
-Version 1.1.0, Initial version supporting loading glb files that are packed into NFTs. While GLTF is "technically" supported, the Thirdweb interface will only support GLB and accordingly - so do we.
 ## Installation
 
 1/ Ensure that you have the .NET SDK installed. Version 7.0 or later is recommended for this project.
