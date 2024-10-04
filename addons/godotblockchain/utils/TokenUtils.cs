@@ -79,14 +79,13 @@ static class TokenUtils {
 
         return extractedAttributes;
     }
-   
+
     /**
-     * Query NFTs from a contract node based on a dictionary of key-value pairs. This utilizes logical and semantics
+     * Query a list of NFTs based on a dictionary of key-value pairs. This utilizes logical and semantics
      * for the query. For example, if you pass in a dictionary with two key-value pairs, the NFT must have both key-value.
      */
-    public static async Task<List<NFT>> QueryNFTsFromContractNode(Node contractNode, Dictionary<string, object> query)
+    public static List<NFT> QueryNFTsFromList(List<NFT> nfts, Dictionary<string, object> query)
     {
-        List<NFT> nfts = await GetAllNFTsFromContractNode(contractNode);
         List<NFT> filteredNFTs = new List<NFT>();
 
         foreach (var nft in nfts)
@@ -120,8 +119,31 @@ static class TokenUtils {
 
         }
         
-        return filteredNFTs;
+        return filteredNFTs;        
     }
+    
+    
+    /**
+     * Query NFTs from a contract node based on a dictionary of key-value pairs. This utilizes logical and semantics
+     * for the query. For example, if you pass in a dictionary with two key-value pairs, the NFT must have both key-value.
+     */
+    public static async Task<List<NFT>> QueryAllNFTsFromContractNode(Node contractNode, Dictionary<string, object> query)
+    {
+        List<NFT> nfts = await GetAllNFTsFromContractNode(contractNode);
+        
+        return QueryNFTsFromList(nfts, query);
+    }
+    
+    /**
+     * Query Owned NFTs from a contract node based on a dictionary of key-value pairs. This utilizes logical and semantics
+     * for the query. For example, if you pass in a dictionary with two key-value pairs, the NFT must have both key-value.
+     */
+    public static async Task<List<NFT>> QueryOwnedNFTsFromContractNode(Node contractNode, Dictionary<string, object> query)
+    {
+        List<NFT> nfts = await GetOwnedNFTsFromContractNode(contractNode);
+        
+        return QueryNFTsFromList(nfts, query);
+    }    
 
     public static async Task<List<NFT>> GetOwnedNFTsFromContractNode(Node contractNode)
     {
