@@ -124,9 +124,9 @@ public partial class BlockchainClientNode : Node
 	public async Task<bool> OnOTPSubmit( string otp )
 	{
 		Log("Submitting OTP " + otp);
-
-		var (address, canRetry) = await inAppWallet.LoginWithOtp(otp);
-
+		
+		var address = await inAppWallet.LoginWithOtp(otp);
+		
 		if (address != null)
 		{
 			Log($"Address: {address}");

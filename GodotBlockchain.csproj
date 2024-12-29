@@ -1,13 +1,11 @@
-<Project Sdk="Godot.NET.Sdk/4.3.0">
+<Project Sdk="Godot.NET.Sdk/4.4.0-dev.7">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net7.0</TargetFramework>
-    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'ios' ">net8.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
   <ItemGroup>
     <!-- Other NuGet package references -->
-    <PackageReference Include="Thirdweb" Version="2.1.2" />
+    <PackageReference Include="Thirdweb" Version="2.12.1" />
     <!-- Update with the latest version when necessary -->
   </ItemGroup>
 </Project>

@@ -156,8 +156,9 @@ static class TokenUtils {
             }
             case ERC721BlockchainContractNode erc721Node:
             {
-                Log("Getting Owned NFTs from ERC721 contract node");
-                return await erc721Node.InternalThirdwebContract.ERC721_GetOwnedNFTs( await BlockchainClientNode.Instance.smartWallet.GetAddress());
+                var address = await BlockchainClientNode.Instance.smartWallet.GetAddress();
+                Log("Getting Owned NFTs for "+ address+" from ERC721 contract node");
+                return await erc721Node.InternalThirdwebContract.ERC721_GetOwnedNFTs( address );
             }
             default:
             {
